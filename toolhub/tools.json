@@ -1,0 +1,117 @@
+[
+  {
+    "file": "automation-addons.sf",
+    "name": "Automation & Addons",
+    "icon": "⚡",
+    "description": "Full automation rules engine and addon system with password-protected sharing",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "automation"
+    ]
+  },
+  {
+    "file": "export-csv.sf",
+    "name": "Export CSV",
+    "icon": "↓",
+    "description": "Export visible rows as CSV. Hidden rows are excluded.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "export"
+    ]
+  },
+  {
+    "file": "find-replace.sf",
+    "name": "Find & Replace",
+    "icon": "⇄",
+    "description": "Search and replace text across all cells in the spreadsheet.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "filter",
+      "edit"
+    ]
+  },
+  {
+    "file": "hide-restore.sf",
+    "name": "Hide & Restore",
+    "icon": "⊘",
+    "description": "Hide individual rows, restore hidden rows, hide zero-value rows, or restore all.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "visibility"
+    ]
+  },
+  {
+    "file": "row-filter-builder.sf",
+    "name": "Row Filter Builder",
+    "icon": "🔍",
+    "description": "Build complex multi-condition filters to show or hide rows based on any combination of rules.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "filter",
+      "visibility",
+      "automation"
+    ]
+  },
+  {
+    "file": "sdk-showcase.sf",
+    "name": "SDK Showcase",
+    "icon": "✨",
+    "description": "Interactive demo of everything the Sheetflow SDK can do. Adds buttons, dropdowns, sidebar panels, modals, keyboard shortcuts, and data hooks.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "sdk"
+    ]
+  },
+  {
+    "file": "search-filter.sf",
+    "name": "Search & Filter",
+    "icon": "*",
+    "description": "Search rows by text, filter by scope, sort by column.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "filter",
+      "organize"
+    ]
+  },
+  {
+    "file": "sheet-editor.sf",
+    "name": "Sheet Editor",
+    "icon": "✎",
+    "description": "Click any cell to edit its value directly. Tab moves to the next cell.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "edit"
+    ]
+  },
+  {
+    "file": "sort-group.sf",
+    "name": "Sort & Group",
+    "icon": "⇵",
+    "description": "View rows grouped by any field. Sort by name, value, or original order.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "organize"
+    ]
+  },
+  {
+    "file": "summary.sf",
+    "name": "Summary",
+    "icon": "▦",
+    "description": "Shows a collapsible summary of visible rows, hidden rows, groups, and value totals.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "tags": [
+      "organize",
+      "data"
+    ]
+  }
+]

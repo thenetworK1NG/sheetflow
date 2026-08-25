@@ -1,0 +1,1887 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2563eb">
+  <title>Sheetflow Tool Development Guide</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --line: #e4e7ec;
+      --text: #1f2937;
+      --muted: #667085;
+      --faint: #98a2b3;
+      --blue: #2563eb;
+      --blue-soft: rgba(37, 99, 235, .09);
+      --mint: #15803d;
+      --mint-soft: rgba(21, 128, 61, .09);
+      --red: #b42318;
+      --red-soft: rgba(180, 35, 24, .08);
+      --amber: #d97706;
+      --amber-soft: rgba(217, 119, 6, .09);
+      --radius: 10px;
+      --shadow: 0 8px 24px rgba(16, 24, 40, .07);
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: "Segoe UI", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text); background: var(--bg); font-size: 15px; line-height: 1.6;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .nav {
+      position: fixed; top: 0; left: 0; width: 260px; height: 100vh;
+      padding: 28px 20px; border-right: 1px solid var(--line); background: var(--panel);
+      overflow-y: auto; z-index: 10;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; letter-spacing: .08em; margin-bottom: 32px; }
+    .nav-brand-mark {
+      display: grid; width: 28px; height: 28px; place-items: center;
+      border: 1px solid rgba(37, 99, 235, .35); border-radius: 7px;
+      color: var(--blue); background: var(--blue-soft); font-size: 14px;
+    }
+    .nav-section { margin-bottom: 22px; }
+    .nav-label { display: block; margin-bottom: 8px; color: var(--faint); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .nav-link { display: block; padding: 5px 10px; border-radius: 6px; color: var(--muted); font-size: 13px; transition: background .12s, color .12s; }
+    .nav-link:hover { color: var(--text); background: var(--blue-soft); text-decoration: none; }
+    .nav-link.active { color: var(--blue); background: var(--blue-soft); font-weight: 650; }
+
+    .content { margin-left: 260px; max-width: 780px; padding: 48px 48px 80px; }
+    h1 { font-size: 34px; font-weight: 720; letter-spacing: -.04em; line-height: 1.1; margin-bottom: 10px; }
+    h2 { margin-top: 48px; margin-bottom: 12px; font-size: 22px; font-weight: 720; letter-spacing: -.02em; }
+    h3 { margin-top: 28px; margin-bottom: 8px; font-size: 16px; font-weight: 700; }
+    p { margin-bottom: 14px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    p strong { color: var(--text); }
+    ul, ol { margin-bottom: 14px; padding-left: 22px; }
+    li { margin-bottom: 6px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    li strong { color: var(--text); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 750;
+    }
+    .badge-blue { color: var(--blue); background: var(--blue-soft); }
+    .badge-green { color: var(--mint); background: var(--mint-soft); }
+    .badge-amber { color: var(--amber); background: var(--amber-soft); }
+    .badge-red { color: var(--red); background: var(--red-soft); }
+
+    pre {
+      margin: 14px 0 18px; padding: 16px 18px; overflow-x: auto;
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: #1e293b; color: #e2e8f0; font-size: 12.5px; line-height: 1.65;
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+    }
+    code {
+      padding: 2px 6px; border-radius: 5px; font-size: 12.5px;
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+      background: rgba(37, 99, 235, .07); color: var(--blue);
+    }
+    pre code { padding: 0; border-radius: 0; background: transparent; color: inherit; }
+
+    .card {
+      margin: 16px 0; padding: 18px 20px;
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--panel);
+    }
+    .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .card-icon { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 8px; background: var(--blue-soft); font-size: 16px; }
+    .card-title { font-size: 14px; font-weight: 700; }
+    .card-desc { color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 13px; }
+    th { text-align: left; padding: 9px 12px; border-bottom: 2px solid var(--line); color: var(--faint); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    td { padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--muted); }
+    td strong { color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+
+    .callout {
+      margin: 16px 0; padding: 14px 16px;
+      border-left: 3px solid var(--blue); border-radius: 0 var(--radius) var(--radius) 0;
+      background: var(--blue-soft); font-size: 13px; line-height: 1.6;
+    }
+    .callout.warning { border-left-color: var(--amber); background: var(--amber-soft); }
+    .callout.danger { border-left-color: var(--red); background: var(--red-soft); }
+    .callout strong { color: var(--text); }
+
+    .step {
+      display: flex; gap: 14px; margin: 14px 0;
+    }
+    .step-num {
+      flex: 0 0 auto; width: 28px; height: 28px;
+      display: grid; place-items: center; border-radius: 50%;
+      background: var(--blue); color: #fff; font-size: 12px; font-weight: 800;
+    }
+    .step-body { flex: 1; min-width: 0; }
+    .step-body strong { display: block; margin-bottom: 2px; font-size: 14px; }
+    .step-body p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .file-tree { font-family: "Cascadia Code", "Fira Code", Consolas, monospace; font-size: 12.5px; line-height: 1.7; color: var(--muted); }
+    .file-tree .dir { color: var(--blue); font-weight: 600; }
+    .file-tree .file { color: var(--text); }
+
+    @media (max-width: 860px) {
+      .nav { display: none; }
+      .content { margin-left: 0; padding: 32px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><span class="nav-brand-mark">+</span><span>SHEETFLOW</span></div>
+  <div class="nav-section">
+    <span class="nav-label">Getting Started</span>
+    <a class="nav-link active" href="#overview">Overview</a>
+    <a class="nav-link" href="#quick-start">Quick Start</a>
+    <a class="nav-link" href="#installation">Installation</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">Tool Format</span>
+    <a class="nav-link" href="#sf-format">The .sf File</a>
+    <a class="nav-link" href="#tool-structure">Tool Structure</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">The SDK</span>
+    <a class="nav-link" href="#sf-namespace">sf Namespace</a>
+    <a class="nav-link" href="#event-bus">Event Bus</a>
+    <a class="nav-link" href="#data-api">Data API</a>
+    <a class="nav-link" href="#modal-api">Modal API</a>
+    <a class="nav-link" href="#sidebar-api">Sidebar API</a>
+    <a class="nav-link" href="#topbar-api">Topbar API</a>
+    <a class="nav-link" href="#keyboard-shortcuts">Keyboard Shortcuts</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">Reference</span>
+    <a class="nav-link" href="#injection-slots">Injection Slots</a>
+    <a class="nav-link" href="#register-tool">registerTool()</a>
+    <a class="nav-link" href="#lifecycle">Lifecycle</a>
+    <a class="nav-link" href="#refs-state">refs &amp; state</a>
+    <a class="nav-link" href="#helpers">Helpers</a>
+    <a class="nav-link" href="#design-system">Design System</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">Examples</span>
+    <a class="nav-link" href="#example-topbar-button">Topbar Button</a>
+    <a class="nav-link" href="#example-data-filter">Data Filter Tool</a>
+    <a class="nav-link" href="#example-modal">Modal Dialog</a>
+    <a class="nav-link" href="#example-sidebar-widget">Sidebar Widget</a>
+    <a class="nav-link" href="#example-full-tool">Full Tool (All Slots)</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">Advanced</span>
+    <a class="nav-link" href="#clash-detection">Clash Detection</a>
+    <a class="nav-link" href="#best-practices">Best Practices</a>
+    <a class="nav-link" href="#troubleshooting">Troubleshooting</a>
+  </div>
+</nav>
+
+<main class="content">
+
+  <h1>Tool Development Guide</h1>
+  <p><span class="badge badge-blue">Sheetflow Tools</span> <span class="badge badge-green">No build step</span> <span class="badge badge-amber">Vanilla JS</span></p>
+  <p>Sheetflow tools are self-contained JavaScript files that extend the spreadsheet organizer without modifying the base app. A tool handles its own UI, state, and lifecycle. The base app provides the <code>window.sf</code> SDK namespace, injection slots, and a tool registry &mdash; everything else is up to you.</p>
+
+  <!-- ─── OVERVIEW ──────────────────────────────────────── -->
+  <h2 id="overview">Overview</h2>
+  <p>A Sheetflow tool is a single <code>.sf</code> file containing JSON metadata and a JavaScript code string. When installed, the code runs once via <code>new Function(code)()</code>, registers the tool with the base app, and the base app calls your <code>activate()</code> / <code>deactivate()</code> lifecycle methods as the user opens and closes it.</p>
+  <p>Your tool is <strong>fully self-contained</strong>. You inject your own buttons, panels, sidebar widgets, and state. The base app provides:</p>
+  <ul>
+    <li><strong><code>window.sf</code> SDK</strong> &mdash; event bus, data API, modal system, sidebar/topbar APIs, keyboard shortcuts, utility wrappers, and read-only access to refs &amp; state</li>
+    <li><strong>Injection slots</strong> &mdash; five designated empty containers where your UI goes</li>
+    <li><strong><code>registerTool()</code></strong> &mdash; registers your tool in the Tools panel</li>
+    <li><strong>CSS design system</strong> &mdash; pre-built classes and custom properties for a consistent look</li>
+  </ul>
+
+  <!-- ─── QUICK START ───────────────────────────────────── -->
+  <h2 id="quick-start">Quick Start</h2>
+  <p>The fastest way to create a tool. Save this as <code>hello-world.sf</code> and install it through the Tools panel.</p>
+<pre><code>// Code string inside your .sf file
+var style = document.createElement("style");
+style.textContent =
+  '.hw-panel{margin:18px 0;padding:16px 20px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}';
+document.head.appendChild(style);
+
+registerTool({
+  id: "hello-world",
+  name: "Hello World",
+  icon: "\uD83D\uDC4B",
+  description: "A minimal example tool.",
+
+  activate: function() {
+    this._panel = document.createElement("div");
+    this._panel.className = "hw-panel";
+    this._panel.innerHTML =
+      '&lt;h3&gt;Hello from your tool!&lt;/h3&gt;' +
+      '&lt;p&gt;This panel is injected into the tool panels slot.&lt;/p&gt;';
+    document.getElementById("toolPanelsSlot").appendChild(this._panel);
+  },
+
+  deactivate: function() {
+    if (this._panel) { this._panel.remove(); this._panel = null; }
+  }
+});</code></pre>
+
+  <p>Wrap it in the .sf format:</p>
+<pre><code>{
+  "format": "sheetflow-tool",
+  "version": 1,
+  "tool": {
+    "id": "hello-world",
+    "name": "Hello World",
+    "icon": "\uD83D\uDC4B",
+    "description": "A minimal example tool.",
+    "author": "Your Name",
+    "version": "1.0.0",
+    "code": "... your JavaScript code as a string ..."
+  }
+}</code></pre>
+
+  <!-- ─── INSTALLATION ──────────────────────────────────── -->
+  <h2 id="installation">Installation</h2>
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Open Sheetflow</strong>
+      <p>Load the spreadsheet organizer in your browser.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Click Tools in the top bar</strong>
+      <p>Opens the Tools panel where you manage installed tools.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>Click "Install tool"</strong>
+      <p>Select your <code>.sf</code> file. The tool installs and appears in the list.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <strong>Toggle the switch to activate</strong>
+      <p>The base app calls your <code>activate()</code> method. Your UI appears in the designated slots.</p>
+    </div>
+  </div>
+
+  <!-- ─── SF FORMAT ─────────────────────────────────────── -->
+  <h2 id="sf-format">The .sf File Format</h2>
+  <p>An <code>.sf</code> file is a JSON file with the following structure:</p>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+    <tr><td><strong>format</strong></td><td>string</td><td>Must be <code>"sheetflow-tool"</code></td></tr>
+    <tr><td><strong>version</strong></td><td>number</td><td>Format version. Currently <code>1</code>.</td></tr>
+    <tr><td><strong>tool</strong></td><td>object</td><td>The tool definition (see below).</td></tr>
+  </table>
+
+  <h3>Tool object fields</h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+    <tr><td><strong>id</strong></td><td>string</td><td>Yes</td><td>Unique identifier. Use lowercase-kebab-case.</td></tr>
+    <tr><td><strong>name</strong></td><td>string</td><td>Yes</td><td>Display name shown in the Tools panel.</td></tr>
+    <tr><td><strong>icon</strong></td><td>string</td><td>No</td><td>Emoji or symbol. Defaults to &#9881;.</td></tr>
+    <tr><td><strong>description</strong></td><td>string</td><td>No</td><td>Short description shown in the Tools panel.</td></tr>
+    <tr><td><strong>author</strong></td><td>string</td><td>No</td><td>Your name or organization.</td></tr>
+    <tr><td><strong>version</strong></td><td>string</td><td>No</td><td>Semantic version string (e.g. "1.0.0").</td></tr>
+    <tr><td><strong>code</strong></td><td>string</td><td>Yes</td><td>JavaScript code that runs once on load. Must call <code>registerTool()</code>.</td></tr>
+  </table>
+
+  <!-- ─── TOOL STRUCTURE ────────────────────────────────── -->
+  <h2 id="tool-structure">Tool Structure</h2>
+  <p>A tool's <code>code</code> string runs once when installed (or on page load for already-installed tools). It must call <code>registerTool()</code> with an object containing your tool's metadata and lifecycle methods.</p>
+<pre><code>// 1. Inject your CSS (optional, recommended)
+var style = document.createElement("style");
+style.textContent = ".my-tool-panel { /* ... */ }";
+document.head.appendChild(style);
+
+// 2. Register the tool
+registerTool({
+  id: "my-tool",
+  name: "My Tool",
+  icon: "\uD83D\uDD27",
+  description: "What it does.",
+
+  // State (your tool owns this)
+  _panel: null,
+  _listeners: [],
+
+  // Called when user opens the tool
+  activate: function() {
+    // Create your UI and inject into a slot
+    // Subscribe to events, read data via sf.*, etc.
+  },
+
+  // Called when user closes the tool or switches to another
+  deactivate: function() {
+    // Remove your UI, detach event listeners, clear timers
+  }
+});</code></pre>
+
+  <div class="callout">
+    <strong>Important:</strong> Your <code>code</code> runs once. The <code>activate()</code>/<code>deactivate()</code> cycle can happen many times. Always clean up in <code>deactivate()</code> &mdash; remove DOM elements, unsubscribe event listeners, clear timers, and unregister keyboard shortcuts.
+  </div>
+
+  <!-- ─── sf NAMESPACE ──────────────────────────────────── -->
+  <h2 id="sf-namespace">The <code>sf</code> Namespace</h2>
+  <p>The base app exposes <code>window.sf</code> as the primary interface for tool developers. It provides a unified API for events, data, UI, and utilities. All tool code should use <code>sf.*</code> instead of calling base app globals directly.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📦</div><div class="card-title">Access pattern</div></div>
+    <div class="card-desc">
+      <code>sf</code> is available globally after the SDK loads. Tools run after the SDK, so it is always ready.<br><br>
+      <strong>Event Bus:</strong> <code>sf.on()</code>, <code>sf.off()</code>, <code>sf.emit()</code>, <code>sf.once()</code><br>
+      <strong>Data Read:</strong> <code>sf.getVisibleRows()</code>, <code>sf.getAllRows()</code>, <code>sf.findRows()</code>, <code>sf.getColumnData()</code>, <code>sf.getColumnStats()</code>, <code>sf.getSelectedRows()</code>, <code>sf.rowById()</code><br>
+      <strong>Data Write:</strong> <code>sf.hideRow()</code>, <code>sf.showRow()</code>, <code>sf.toggleRowVisibility()</code>, <code>sf.setCellValue()</code>, <code>sf.insertRow()</code>, <code>sf.deleteRow()</code>, <code>sf.selectAllRows()</code>, <code>sf.deselectAllRows()</code><br>
+      <strong>Modal:</strong> <code>sf.openModal()</code>, <code>sf.closeModal()</code>, <code>sf.confirm()</code>, <code>sf.prompt()</code><br>
+      <strong>Sidebar:</strong> <code>sf.addSidebarSection()</code>, <code>sf.removeSidebarSection()</code>, <code>sf.updateSidebarSection()</code>, <code>sf.toggleSidebar()</code>, <code>sf.isSidebarCollapsed()</code><br>
+      <strong>Topbar:</strong> <code>sf.addTopbarButton()</code>, <code>sf.removeTopbarButton()</code>, <code>sf.setTopbarStatus()</code>, <code>sf.resetTopbarStatus()</code>, <code>sf.addTopbarDropdown()</code>, <code>sf.removeTopbarDropdown()</code><br>
+      <strong>Keyboard:</strong> <code>sf.registerShortcut()</code>, <code>sf.unregisterShortcut()</code><br>
+      <strong>Utilities:</strong> <code>sf.showToast()</code>, <code>sf.refresh()</code>, <code>sf.renderTable()</code>, <code>sf.currentSheet()</code>, <code>sf.escapeHTML()</code>, <code>sf.normalizeText()</code>, <code>sf.valueToString()</code>, <code>sf.formatNumber()</code>, <code>sf.parseNumber()</code>, <code>sf.downloadText()</code><br>
+      <strong>Read-only refs:</strong> <code>sf.refs</code>, <code>sf.state</code>
+    </div>
+  </div>
+
+  <!-- ─── EVENT BUS ─────────────────────────────────────── -->
+  <h2 id="event-bus">Event Bus</h2>
+  <p>The event bus lets tools subscribe to app lifecycle events and communicate with each other. Use <code>sf.on()</code> to listen and <code>sf.emit()</code> to broadcast.</p>
+
+  <table>
+    <tr><th>Method</th><th>Signature</th><th>Description</th></tr>
+    <tr><td><strong>sf.on()</strong></td><td><code>sf.on(eventName, callback)</code></td><td>Subscribe to an event. Callback receives event data. Returns nothing.</td></tr>
+    <tr><td><strong>sf.off()</strong></td><td><code>sf.off(eventName, callback)</code></td><td>Unsubscribe a specific callback.</td></tr>
+    <tr><td><strong>sf.emit()</strong></td><td><code>sf.emit(eventName, data)</code></td><td>Broadcast an event to all subscribers. Pass arbitrary data.</td></tr>
+    <tr><td><strong>sf.once()</strong></td><td><code>sf.once(eventName, callback)</code></td><td>Subscribe, then auto-unsubscribe after the first call.</td></tr>
+  </table>
+
+  <h3>Built-in Events</h3>
+  <table>
+    <tr><th>Event</th><th>Data</th><th>When</th></tr>
+    <tr><td><strong>sheet:loaded</strong></td><td><code>{ fileName: string }</code></td><td>A spreadsheet file finishes loading</td></tr>
+    <tr><td><strong>sheet:cleared</strong></td><td><code>{}</code></td><td>Workspace is cleared</td></tr>
+    <tr><td><strong>sheet:changed</strong></td><td><code>{ sheetName: string }</code></td><td>User switches between worksheets</td></tr>
+    <tr><td><strong>tool:activated</strong></td><td><code>{ toolId: string }</code></td><td>A tool is activated</td></tr>
+    <tr><td><strong>tool:deactivated</strong></td><td><code>{ toolId: string }</code></td><td>A tool is deactivated</td></tr>
+    <tr><td><strong>data:modified</strong></td><td><code>{ type, rowId, ... }</code></td><td>Row data is modified (cell edit, insert, delete)</td></tr>
+    <tr><td><strong>row:hidden</strong></td><td><code>{ id, row }</code></td><td>A row is hidden</td></tr>
+    <tr><td><strong>row:shown</strong></td><td><code>{ id, row }</code></td><td>A hidden row is shown</td></tr>
+    <tr><td><strong>selection:changed</strong></td><td><code>{ selectedIds: Set }</code></td><td>Row selection changes</td></tr>
+  </table>
+
+  <h3>Subscribe to sheet load</h3>
+<pre><code>registerTool({
+  id: "load-watcher",
+  name: "Load Watcher",
+  icon: "\uD83D\uDC41",
+
+  activate: function() {
+    var self = this;
+    this._onLoad = function(data) {
+      sf.showToast("Loaded: " + data.fileName, "success");
+    };
+    sf.on("sheet:loaded", this._onLoad);
+  },
+
+  deactivate: function() {
+    sf.off("sheet:loaded", this._onLoad);
+  }
+});</code></pre>
+
+  <h3>Emit a custom event</h3>
+<pre><code>// In Tool A: emit a custom event
+sf.emit("my-tool:dataReady", { count: 42 });
+
+// In Tool B: listen for it
+sf.on("my-tool:dataReady", function(data) {
+  sf.showToast("Tool A found " + data.count + " items");
+});</code></pre>
+
+  <h3>Listen once</h3>
+<pre><code>// Fires only on the first data modification after activation
+sf.once("data:modified", function(data) {
+  sf.showToast("First edit detected: row " + data.rowId);
+});</code></pre>
+
+  <h3>Track selection changes</h3>
+<pre><code>registerTool({
+  id: "selection-tracker",
+  name: "Selection Tracker",
+  icon: "\u2705",
+
+  activate: function() {
+    var self = this;
+    this._onSelection = function(data) {
+      var count = data.selectedIds.size;
+      if (count > 0) {
+        sf.showToast(count + " row" + (count > 1 ? "s" : "") + " selected");
+      }
+    };
+    sf.on("selection:changed", this._onSelection);
+  },
+
+  deactivate: function() {
+    sf.off("selection:changed", this._onSelection);
+  }
+});</code></pre>
+
+  <!-- ─── DATA API ──────────────────────────────────────── -->
+  <h2 id="data-api">Data API</h2>
+  <p>Read and modify spreadsheet data through the <code>sf</code> namespace. All methods operate on the current active sheet.</p>
+
+  <h3>Reading Data</h3>
+  <table>
+    <tr><th>Method</th><th>Returns</th><th>Description</th></tr>
+    <tr><td><strong>sf.getVisibleRows()</strong></td><td>Row[]</td><td>Rows that are not hidden</td></tr>
+    <tr><td><strong>sf.getAllRows()</strong></td><td>Row[]</td><td>All rows, including hidden ones</td></tr>
+    <tr><td><strong>sf.findRows(colIndex, filterFn)</strong></td><td>Row[]</td><td>Filter rows. <code>filterFn(row, colIndex)</code> returns boolean</td></tr>
+    <tr><td><strong>sf.getColumnData(colIndex)</strong></td><td>any[]</td><td>All raw values in a column</td></tr>
+    <tr><td><strong>sf.getColumnStats(colIndex)</strong></td><td>object</td><td><code>{ count, numeric, min, max, sum, avg }</code></td></tr>
+    <tr><td><strong>sf.getSelectedRows()</strong></td><td>Row[]</td><td>Currently selected row objects</td></tr>
+    <tr><td><strong>sf.rowById(id)</strong></td><td>Row | undefined</td><td>Find a single row by its ID</td></tr>
+  </table>
+
+  <h3>Row Object Shape</h3>
+<pre><code>{
+  id: string,           // Unique row identifier
+  values: any[],        // Cell values, indexed by column
+  searchText: string,   // Flattened lowercase text for search
+  emptyColumns: bool[], // Which columns are empty
+  sourceIndex: number,  // Original position in the source sheet
+  sourceRowNumber: number, // 1-based row number in spreadsheet
+  blank: boolean,       // True if all values are empty
+  hidden: boolean       // True if row is hidden
+}</code></pre>
+
+  <h3>Writing Data</h3>
+  <table>
+    <tr><th>Method</th><th>Returns</th><th>Description</th></tr>
+    <tr><td><strong>sf.hideRow(id)</strong></td><td>void</td><td>Hide a row by ID. Emits <code>row:hidden</code>.</td></tr>
+    <tr><td><strong>sf.showRow(id)</strong></td><td>void</td><td>Show a hidden row. Emits <code>row:shown</code>.</td></tr>
+    <tr><td><strong>sf.toggleRowVisibility(id)</strong></td><td>void</td><td>Toggle a row's hidden state.</td></tr>
+    <tr><td><strong>sf.setCellValue(rowId, colIndex, value)</strong></td><td>boolean</td><td>Edit a cell. Returns true on success. Emits <code>data:modified</code>.</td></tr>
+    <tr><td><strong>sf.insertRow(afterIndex, values)</strong></td><td>Row | null</td><td>Insert a row after the given index. Emits <code>data:modified</code>.</td></tr>
+    <tr><td><strong>sf.deleteRow(id)</strong></td><td>boolean</td><td>Permanently delete a row. Emits <code>data:modified</code>.</td></tr>
+    <tr><td><strong>sf.selectAllRows()</strong></td><td>void</td><td>Select all rows. Emits <code>selection:changed</code>.</td></tr>
+    <tr><td><strong>sf.deselectAllRows()</strong></td><td>void</td><td>Clear selection. Emits <code>selection:changed</code>.</td></tr>
+  </table>
+
+  <div class="callout warning">
+    <strong>Always call <code>sf.refresh()</code></strong> after modifying data (hide, show, insert, delete, cell edit) to re-render the base app's table, stats, and page controls.
+  </div>
+
+  <h3>Get column statistics</h3>
+<pre><code>registerTool({
+  id: "col-stats",
+  name: "Column Stats",
+  icon: "\uD83D\uDCCA",
+
+  activate: function() {
+    var sheet = sf.currentSheet();
+    if (!sheet) { sf.showToast("No data loaded.", "error"); return; }
+
+    var qtyCol = sheet.quantityColumn;
+    if (qtyCol === null) { sf.showToast("No quantity column detected.", "error"); return; }
+
+    var stats = sf.getColumnStats(qtyCol);
+    sf.showToast(
+      "Qty: " + stats.numeric + " numeric rows, " +
+      "sum=" + sf.formatNumber(stats.sum) + ", " +
+      "avg=" + sf.formatNumber(Math.round(stats.avg * 100) / 100)
+    );
+  }
+});</code></pre>
+
+  <h3>Find and hide rows matching a filter</h3>
+<pre><code>registerTool({
+  id: "blank-hider",
+  name: "Hide Blank Rows",
+  icon: "\uD83D\uDD76",
+
+  activate: function() {
+    var rows = sf.findRows(0, function(row) {
+      var val = sf.valueToString(row.values[0]);
+      return !val.trim();
+    });
+    rows.forEach(function(row) { sf.hideRow(row.id); });
+    sf.refresh();
+    sf.showToast("Hidden " + rows.length + " blank rows.", "success");
+  }
+});</code></pre>
+
+  <h3>Read all column values</h3>
+<pre><code>var sheet = sf.currentSheet();
+if (sheet) {
+  var names = sf.getColumnData(0);
+  var unique = [];
+  names.forEach(function(v) {
+    var s = sf.valueToString(v);
+    if (s && unique.indexOf(s) === -1) unique.push(s);
+  });
+  sf.showToast(unique.length + " unique values in column 1");
+}</code></pre>
+
+  <h3>Insert and delete rows</h3>
+<pre><code>// Insert a new row after row index 2
+var newRow = sf.insertRow(2, ["Widget A", "Warehouse 1", "100"]);
+if (newRow) {
+  sf.showToast("Inserted row: " + newRow.id, "success");
+}
+
+// Delete it
+sf.deleteRow(newRow.id);
+sf.refresh();</code></pre>
+
+  <h3>Edit a cell value</h3>
+<pre><code>var sheet = sf.currentSheet();
+if (sheet &amp;&amp; sheet.rows.length > 0) {
+  var row = sheet.rows[0];
+  sf.setCellValue(row.id, 1, "Updated Value");
+  sf.refresh();
+  sf.showToast("Cell updated.", "success");
+}</code></pre>
+
+  <!-- ─── MODAL API ─────────────────────────────────────── -->
+  <h2 id="modal-api">Modal API</h2>
+  <p>Show modal dialogs for confirmations, inputs, and custom content. The modal system handles focus trapping, click-outside-to-close, and stacking.</p>
+
+  <table>
+    <tr><th>Method</th><th>Returns</th><th>Description</th></tr>
+    <tr><td><strong>sf.openModal({ ... })</strong></td><td>close function</td><td>Show a modal. Returns a function that closes it.</td></tr>
+    <tr><td><strong>sf.closeModal()</strong></td><td>void</td><td>Close the currently open modal.</td></tr>
+    <tr><td><strong>sf.confirm(message)</strong></td><td>Promise&lt;boolean&gt;</td><td>Show a confirm dialog. Resolves <code>true</code> on OK, <code>false</code> on cancel.</td></tr>
+    <tr><td><strong>sf.prompt(message, defaultValue)</strong></td><td>Promise&lt;string|null&gt;</td><td>Show an input dialog. Resolves the input value or <code>null</code> on cancel.</td></tr>
+  </table>
+
+  <h3>sf.openModal() options</h3>
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    <tr><td><strong>title</strong></td><td>string</td><td><code>""</code></td><td>Modal title shown in the header</td></tr>
+    <tr><td><strong>content</strong></td><td>string | Element</td><td><code>""</code></td><td>HTML string or DOM element for the modal body</td></tr>
+    <tr><td><strong>buttons</strong></td><td>array</td><td>[Close]</td><td>Array of <code>{ label, type, onClick }</code> objects</td></tr>
+    <tr><td><strong>width</strong></td><td>number</td><td><code>520</code></td><td>Max width in pixels</td></tr>
+    <tr><td><strong>onClose</strong></td><td>function</td><td><code>null</code></td><td>Called when modal closes (via button, X, or overlay click)</td></tr>
+  </table>
+
+  <h3>Button types for modal buttons</h3>
+  <ul>
+    <li><strong>"primary"</strong> &mdash; Blue filled button</li>
+    <li><strong>"ghost"</strong> &mdash; Subtle outlined button (default)</li>
+    <li><strong>"danger"</strong> &mdash; Red button for destructive actions</li>
+  </ul>
+
+  <h3>Custom modal with buttons</h3>
+<pre><code>registerTool({
+  id: "settings-tool",
+  name: "Settings",
+  icon: "\u2699\uFE0F",
+
+  activate: function() {
+    var close = sf.openModal({
+      title: "Tool Settings",
+      content:
+        '&lt;div style="display:flex;flex-direction:column;gap:12px"&gt;' +
+        '&lt;label style="font-size:13px;font-weight:600;color:var(--text)"&gt;' +
+        'Max rows to process' +
+        '&lt;input type="number" id="st-maxRows" value="100" ' +
+        'style="width:100%;padding:8px 12px;border:1px solid var(--line);' +
+        'border-radius:8px;font-size:14px;margin-top:4px;outline:none;font-family:inherit"&gt;' +
+        '&lt;/label&gt;&lt;/div&gt;',
+      buttons: [
+        { label: "Cancel", type: "ghost", onClick: function() {} },
+        { label: "Save", type: "primary", onClick: function() {
+          var val = document.getElementById("st-maxRows").value;
+          sf.showToast("Max rows set to " + val, "success");
+        }}
+      ],
+      onClose: function() {
+        sf.showToast("Settings closed.");
+      }
+    });
+  }
+});</code></pre>
+
+  <h3>Confirm dialog</h3>
+<pre><code>registerTool({
+  id: "danger-delete",
+  name: "Delete Tool",
+  icon: "\u274C",
+
+  activate: function() {
+    sf.confirm("Delete all hidden rows? This cannot be undone.").then(function(ok) {
+      if (ok) {
+        var rows = sf.getAllRows().filter(function(r) { return r.hidden; });
+        rows.forEach(function(r) { sf.deleteRow(r.id); });
+        sf.refresh();
+        sf.showToast("Deleted " + rows.length + " rows.", "success");
+      }
+    });
+  }
+});</code></pre>
+
+  <h3>Prompt dialog</h3>
+<pre><code>sf.prompt("Enter a column name to search:", "Product").then(function(value) {
+  if (value !== null) {
+    sf.showToast("Searching for: " + value);
+  }
+});</code></pre>
+
+  <!-- ─── SIDEBAR API ───────────────────────────────────── -->
+  <h2 id="sidebar-api">Sidebar API</h2>
+  <p>Add persistent sections to the left sidebar below the file import zone. Sidebar sections survive tool re-activation and provide a clean way to display ongoing tool state.</p>
+
+  <table>
+    <tr><th>Method</th><th>Returns</th><th>Description</th></tr>
+    <tr><td><strong>sf.addSidebarSection({ id, label, icon, content })</strong></td><td>Element | null</td><td>Add a section to the sidebar. Returns the DOM element.</td></tr>
+    <tr><td><strong>sf.removeSidebarSection(id)</strong></td><td>void</td><td>Remove a section by ID.</td></tr>
+    <tr><td><strong>sf.updateSidebarSection(id, content)</strong></td><td>void</td><td>Replace the content of an existing section.</td></tr>
+    <tr><td><strong>sf.toggleSidebar()</strong></td><td>void</td><td>Toggle the sidebar open/closed.</td></tr>
+    <tr><td><strong>sf.isSidebarCollapsed()</strong></td><td>boolean</td><td>Returns true if sidebar is collapsed.</td></tr>
+  </table>
+
+  <h3>addSidebarSection() options</h3>
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Description</th></tr>
+    <tr><td><strong>id</strong></td><td>string</td><td>Unique ID for this section. Required.</td></tr>
+    <tr><td><strong>label</strong></td><td>string</td><td>Section header label (kicker style).</td></tr>
+    <tr><td><strong>icon</strong></td><td>string</td><td>Emoji icon displayed above the content.</td></tr>
+    <tr><td><strong>content</strong></td><td>string | Element</td><td>HTML string or DOM element.</td></tr>
+  </table>
+
+  <h3>Add a sidebar section</h3>
+<pre><code>registerTool({
+  id: "sidebar-demo",
+  name: "Sidebar Demo",
+  icon: "\uD83D\uDCCC",
+
+  activate: function() {
+    sf.addSidebarSection({
+      id: "sidebar-demo-main",
+      label: "My Tool",
+      icon: "\uD83D\uDCCC",
+      content: '&lt;div style="font-size:12px;color:var(--muted)"&gt;' +
+               'Loaded rows: &lt;strong id="sd-count"&gt;0&lt;/strong&gt;&lt;/div&gt;'
+    });
+
+    this._updateCount();
+  },
+
+  deactivate: function() {
+    sf.removeSidebarSection("sidebar-demo-main");
+  },
+
+  _updateCount: function() {
+    var rows = sf.getVisibleRows();
+    var el = document.getElementById("sd-count");
+    if (el) el.textContent = rows.length;
+  }
+});</code></pre>
+
+  <h3>Update sidebar content dynamically</h3>
+<pre><code>// Rebuild the sidebar section with new data
+sf.updateSidebarSection("my-section-id",
+  '&lt;div style="font-size:12px;color:var(--muted)"&gt;' +
+  'Updated at ' + new Date().toLocaleTimeString() + '&lt;/div&gt;'
+);</code></pre>
+
+  <h3>Toggle and check sidebar</h3>
+<pre><code>// Collapse the sidebar programmatically
+if (!sf.isSidebarCollapsed()) {
+  sf.toggleSidebar();
+}</code></pre>
+
+  <!-- ─── TOPBAR API ────────────────────────────────────── -->
+  <h2 id="topbar-api">Topbar API</h2>
+  <p>Add buttons and dropdown menus to the top bar. The topbar API manages placement and cleanup automatically.</p>
+
+  <table>
+    <tr><th>Method</th><th>Returns</th><th>Description</th></tr>
+    <tr><td><strong>sf.addTopbarButton({ id, label, icon, onClick, className })</strong></td><td>Element | null</td><td>Add a button to the topbar action slot.</td></tr>
+    <tr><td><strong>sf.removeTopbarButton(id)</strong></td><td>void</td><td>Remove a button by ID.</td></tr>
+    <tr><td><strong>sf.addTopbarDropdown({ id, label, items })</strong></td><td>Element | null</td><td>Add a dropdown menu to the topbar.</td></tr>
+    <tr><td><strong>sf.removeTopbarDropdown(id)</strong></td><td>void</td><td>Remove a dropdown by ID.</td></tr>
+    <tr><td><strong>sf.setTopbarStatus(text, type)</strong></td><td>void</td><td>Override the topbar status text temporarily.</td></tr>
+    <tr><td><strong>sf.resetTopbarStatus()</strong></td><td>void</td><td>Restore the default status text.</td></tr>
+  </table>
+
+  <h3>sf.addTopbarButton() options</h3>
+  <table>
+    <tr><th>Option</th><th>Type</th><th>Description</th></tr>
+    <tr><td><strong>id</strong></td><td>string</td><td>Unique button ID. Required.</td></tr>
+    <tr><td><strong>label</strong></td><td>string</td><td>Button text.</td></tr>
+    <tr><td><strong>icon</strong></td><td>string</td><td>Emoji icon before the label.</td></tr>
+    <tr><td><strong>onClick</strong></td><td>function</td><td>Click handler.</td></tr>
+    <tr><td><strong>className</strong></td><td>string</td><td>Additional CSS classes (space-separated).</td></tr>
+  </table>
+
+  <h3>sf.addTopbarDropdown() items</h3>
+  <p>Each item in the <code>items</code> array is an object:</p>
+  <table>
+    <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+    <tr><td><strong>label</strong></td><td>string</td><td>Menu item text</td></tr>
+    <tr><td><strong>icon</strong></td><td>string</td><td>Emoji icon (optional)</td></tr>
+    <tr><td><strong>onClick</strong></td><td>function</td><td>Click handler</td></tr>
+    <tr><td><strong>divider</strong></td><td>boolean</td><td>If true, renders a divider line instead of a menu item</td></tr>
+  </table>
+
+  <h3>Add a topbar button</h3>
+<pre><code>registerTool({
+  id: "export-csv",
+  name: "CSV Export",
+  icon: "\uD83D\uDCE4",
+
+  activate: function() {
+    var self = this;
+    sf.addTopbarButton({
+      id: "export-csv-btn",
+      label: "Export CSV",
+      icon: "\uD83D\uDCE4",
+      onClick: function() {
+        var sheet = sf.currentSheet();
+        if (!sheet) { sf.showToast("No data.", "error"); return; }
+
+        var header = sheet.headers.join(",");
+        var lines = sf.getVisibleRows().map(function(r) {
+          return r.values.map(function(v) {
+            return '"' + sf.valueToString(v).replace(/"/g, '""') + '"';
+          }).join(",");
+        });
+        sf.downloadText(header + "\n" + lines.join("\n"), "export.csv", "text/csv");
+        sf.showToast("CSV exported.", "success");
+      }
+    });
+  },
+
+  deactivate: function() {
+    sf.removeTopbarButton("export-csv-btn");
+  }
+});</code></pre>
+
+  <h3>Add a topbar dropdown</h3>
+<pre><code>registerTool({
+  id: "sort-tool",
+  name: "Sort Tool",
+  icon: "\uD83D\uDD03",
+
+  activate: function() {
+    sf.addTopbarDropdown({
+      id: "sort-dropdown",
+      label: "Sort",
+      items: [
+        { label: "Sort A\u2192Z", icon: "\u2191", onClick: function() { sortColumn(0, "asc"); } },
+        { label: "Sort Z\u2192A", icon: "\u2193", onClick: function() { sortColumn(0, "desc"); } },
+        { divider: true },
+        { label: "Sort by Quantity", icon: "\uD83D\uDCCA", onClick: function() { sortColumn(3, "desc"); } }
+      ]
+    });
+  },
+
+  deactivate: function() {
+    sf.removeTopbarDropdown("sort-dropdown");
+  }
+});
+
+function sortColumn(colIndex, dir) {
+  var sheet = sf.currentSheet();
+  if (!sheet) return;
+  sheet.rows.sort(function(a, b) {
+    var va = sf.valueToString(a.values[colIndex]);
+    var vb = sf.valueToString(b.values[colIndex]);
+    var cmp = va.localeCompare(vb, undefined, { numeric: true });
+    return dir === "desc" ? -cmp : cmp;
+  });
+  sf.refresh();
+  sf.showToast("Sorted by column " + (colIndex + 1), "success");
+}</code></pre>
+
+  <h3>Override topbar status</h3>
+<pre><code>// Temporarily show custom status text
+sf.setTopbarStatus("Processing data...", "info");
+
+// Later, restore the default
+sf.resetTopbarStatus();</code></pre>
+
+  <!-- ─── KEYBOARD SHORTCUTS ────────────────────────────── -->
+  <h2 id="keyboard-shortcuts">Keyboard Shortcuts</h2>
+  <p>Register global keyboard shortcuts that work when your tool is active. The SDK intercepts keystrokes before the base app's handler.</p>
+
+  <table>
+    <tr><th>Method</th><th>Signature</th><th>Description</th></tr>
+    <tr><td><strong>sf.registerShortcut()</strong></td><td><code>sf.registerShortcut(combo, callback, description)</code></td><td>Register a keyboard shortcut.</td></tr>
+    <tr><td><strong>sf.unregisterShortcut()</strong></td><td><code>sf.unregisterShortcut(combo)</code></td><td>Remove a keyboard shortcut.</td></tr>
+  </table>
+
+  <p><strong>Combo format:</strong> Modifiers + key, joined by <code>+</code>. Case-insensitive. Supported modifiers: <code>Ctrl</code>, <code>Shift</code>, <code>Alt</code>, <code>Meta</code> (Cmd on Mac).</p>
+
+  <h3>Register shortcuts</h3>
+<pre><code>registerTool({
+  id: "shortcut-demo",
+  name: "Shortcut Demo",
+  icon: "\u2328\uFE0F",
+
+  activate: function() {
+    var self = this;
+
+    sf.registerShortcut("Ctrl+Shift+F", function() {
+      sf.showToast("Search triggered!", "success");
+    }, "Open search");
+
+    sf.registerShortcut("Ctrl+Shift+D", function() {
+      var rows = sf.getVisibleRows();
+      sf.showToast(rows.length + " visible rows", "success");
+    }, "Show row count");
+
+    sf.registerShortcut("Escape", function() {
+      // Custom escape behavior
+      sf.showToast("Escape pressed", "");
+    }, "Custom escape");
+  },
+
+  deactivate: function() {
+    sf.unregisterShortcut("Ctrl+Shift+F");
+    sf.unregisterShortcut("Ctrl+Shift+D");
+    sf.unregisterShortcut("Escape");
+  }
+});</code></pre>
+
+  <div class="callout warning">
+    <strong>Always unregister shortcuts in <code>deactivate()</code>.</strong> Otherwise they persist after the tool is closed and may conflict with other tools or the base app.
+  </div>
+
+  <!-- ─── INJECTION SLOTS ───────────────────────────────── -->
+  <h2 id="injection-slots">Injection Slots</h2>
+  <p>Sheetflow provides five designated empty containers where tools inject their UI. Use <code>document.getElementById()</code> to find them.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">🔘</div><div class="card-title">toolActionSlot</div></div>
+    <div class="card-desc">
+      <strong>Location:</strong> Topbar, far left of the action area.<br>
+      <strong>Use for:</strong> Primary tool action buttons (export, run, process).<br>
+      <strong>Layout:</strong> Flex row. Buttons appear inline at the start of the topbar actions.<br>
+      <strong>Preferred API:</strong> <code>sf.addTopbarButton()</code> manages this slot automatically.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📋</div><div class="card-title">toolDropdownSlot</div></div>
+    <div class="card-desc">
+      <strong>Location:</strong> Topbar, after the action slot.<br>
+      <strong>Use for:</strong> Dropdown menus with multiple options.<br>
+      <strong>Layout:</strong> Flex row. Dropdowns appear after any action buttons.<br>
+      <strong>Preferred API:</strong> <code>sf.addTopbarDropdown()</code> manages this slot automatically.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">⚙️</div><div class="card-title">toolButtonsSlot</div></div>
+    <div class="card-desc">
+      <strong>Location:</strong> Topbar, between the dropdown slot and the Tools button.<br>
+      <strong>Use for:</strong> Additional toggle buttons, status indicators, secondary actions.<br>
+      <strong>Layout:</strong> Flex row. Buttons appear inline in the topbar.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📐</div><div class="card-title">toolPanelsSlot</div></div>
+    <div class="card-desc">
+      <strong>Location:</strong> Between the topbar and the workspace section.<br>
+      <strong>Use for:</strong> Tool control panels, forms, configuration UIs, rule editors, filter bars.<br>
+      <strong>Layout:</strong> Block. Panels appear stacked vertically above the workspace.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon">📎</div><div class="card-title">toolSidebarSlot</div></div>
+    <div class="card-desc">
+      <strong>Location:</strong> Left sidebar, below the file import zone.<br>
+      <strong>Use for:</strong> Sidebar settings, file-specific tool controls, compact widgets, live stats.<br>
+      <strong>Layout:</strong> Block. Content appears in the sidebar column.<br>
+      <strong>Preferred API:</strong> <code>sf.addSidebarSection()</code> manages this slot automatically.
+    </div>
+  </div>
+
+<pre><code>// Direct slot injection (for toolButtonsSlot and toolPanelsSlot)
+var btnSlot = document.getElementById("toolButtonsSlot");
+var btn = document.createElement("button");
+btn.className = "button button-ghost button-small";
+btn.textContent = "My Action";
+btn.addEventListener("click", doSomething);
+btnSlot.appendChild(btn);
+
+// Panel injection
+var panelSlot = document.getElementById("toolPanelsSlot");
+var panel = document.createElement("div");
+panel.innerHTML = "...";
+panelSlot.appendChild(panel);
+
+// For action buttons, use sf.addTopbarButton() instead (auto-manages toolActionSlot)
+// For dropdowns, use sf.addTopbarDropdown() instead (auto-manages toolDropdownSlot)
+// For sidebar, use sf.addSidebarSection() instead (auto-manages toolSidebarSlot)</code></pre>
+
+  <div class="callout warning">
+    <strong>Prefix your IDs.</strong> All element IDs your tool creates should be prefixed with your tool's ID (e.g. <code>myTool-submitButton</code>) to avoid collisions with other tools or the base app.
+  </div>
+
+  <!-- ─── registerTool() ────────────────────────────────── -->
+  <h2 id="register-tool">registerTool()</h2>
+  <p>Global function provided by the base app. Call it once in your tool's code.</p>
+<pre><code>registerTool({
+  id: string,          // Required. Unique tool ID (lowercase-kebab-case).
+  name: string,        // Required. Display name.
+  icon: string,        // Optional. Emoji/symbol. Default: &#9881;
+  description: string, // Optional. Short description.
+  activate: function,  // Optional. Called when tool is opened.
+  deactivate: function // Optional. Called when tool is closed.
+});</code></pre>
+
+  <p>The tool appears in the Tools panel automatically. Users can toggle it on or off from there. You can also store custom properties on the tool object &mdash; they persist across activate/deactivate cycles.</p>
+
+  <!-- ─── LIFECYCLE ─────────────────────────────────────── -->
+  <h2 id="lifecycle">Lifecycle</h2>
+  <table>
+    <tr><th>Phase</th><th>When</th><th>What to do</th></tr>
+    <tr>
+      <td><strong>code runs</strong></td>
+      <td>App loads or tool is installed</td>
+      <td>Inject CSS into <code>document.head</code>, call <code>registerTool()</code>. Do NOT create UI yet.</td>
+    </tr>
+    <tr>
+      <td><strong>activate()</strong></td>
+      <td>User toggles tool on in Tools panel</td>
+      <td>Create UI, inject into slots or use <code>sf.*</code> APIs, subscribe to events, read data, register shortcuts.</td>
+    </tr>
+    <tr>
+      <td><strong>deactivate()</strong></td>
+      <td>User toggles tool off or opens another tool</td>
+      <td>Remove UI from slots, unsubscribe events, unregister shortcuts, clear intervals/timeouts, reset state.</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>activate() can be called multiple times.</strong> If a user closes and reopens your tool, <code>activate()</code> runs again. Make sure your code is idempotent &mdash; calling it twice without <code>deactivate()</code> in between should not create duplicate UI.
+  </div>
+
+  <h3>Full lifecycle example</h3>
+<pre><code>registerTool({
+  id: "lifecycle-demo",
+  name: "Lifecycle Demo",
+  icon: "\uD83D\uDD04",
+
+  _panel: null,
+  _onData: null,
+  _timer: null,
+
+  activate: function() {
+    var self = this;
+
+    // Inject panel
+    this._panel = document.createElement("div");
+    this._panel.style.cssText = "margin:18px 0;padding:16px 20px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)";
+    this._panel.innerHTML = '&lt;h3&gt;Lifecycle Demo&lt;/h3&gt;&lt;p id="ld-count"&gt;Counting...&lt;/p&gt;';
+    document.getElementById("toolPanelsSlot").appendChild(this._panel);
+
+    // Subscribe to events
+    this._onData = function() { self._updateCount(); };
+    sf.on("data:modified", this._onData);
+
+    // Start polling
+    this._timer = setInterval(function() { self._updateCount(); }, 3000);
+
+    // Register a shortcut
+    sf.registerShortcut("Ctrl+Shift+L", function() {
+      sf.showToast("Lifecycle demo is active!");
+    }, "Lifecycle demo shortcut");
+  },
+
+  deactivate: function() {
+    // Remove panel
+    if (this._panel) { this._panel.remove(); this._panel = null; }
+
+    // Unsubscribe
+    if (this._onData) { sf.off("data:modified", this._onData); this._onData = null; }
+
+    // Stop polling
+    if (this._timer) { clearInterval(this._timer); this._timer = null; }
+
+    // Unregister shortcut
+    sf.unregisterShortcut("Ctrl+Shift+L");
+  },
+
+  _updateCount: function() {
+    var el = document.getElementById("ld-count");
+    if (el) el.textContent = "Visible rows: " + sf.getVisibleRows().length;
+  }
+});</code></pre>
+
+  <!-- ─── REFS & STATE ──────────────────────────────────── -->
+  <h2 id="refs-state">refs &amp; state</h2>
+  <p>Read-only access to the base app's DOM references and internal state via <code>sf.refs</code> and <code>sf.state</code>.</p>
+
+  <h3><code>sf.refs</code> &mdash; DOM References</h3>
+  <p>Pre-cached references to key DOM elements. Read-only. Do not reassign these properties.</p>
+  <table>
+    <tr><th>Property</th><th>Element</th></tr>
+    <tr><td><strong>refs.fileInput</strong></td><td>Hidden file input for spreadsheet import</td></tr>
+    <tr><td><strong>refs.dropZone</strong></td><td>Drop zone label in the sidebar</td></tr>
+    <tr><td><strong>refs.workspaceDot</strong></td><td>Status dot indicator in the topbar</td></tr>
+    <tr><td><strong>refs.topStatus</strong></td><td>Status text in the topbar ("Waiting for a spreadsheet")</td></tr>
+    <tr><td><strong>refs.clearButton</strong></td><td>"Clear workspace" button</td></tr>
+    <tr><td><strong>refs.exportXlsxButton</strong></td><td>"Export XLSX" button</td></tr>
+    <tr><td><strong>refs.tableTitle</strong></td><td>H2 title above the table ("Spreadsheet rows")</td></tr>
+    <tr><td><strong>refs.tableSubtitle</strong></td><td>Subtitle paragraph below the title</td></tr>
+    <tr><td><strong>refs.tableScroll</strong></td><td>Scrollable table container div</td></tr>
+    <tr><td><strong>refs.tableHead</strong></td><td>The <code>&lt;thead&gt;</code> element</td></tr>
+    <tr><td><strong>refs.tableBody</strong></td><td>The <code>&lt;tbody&gt;</code> element</td></tr>
+    <tr><td><strong>refs.emptyState</strong></td><td>Empty state container shown when no data</td></tr>
+    <tr><td><strong>refs.emptyTitle</strong></td><td>Title in empty state ("Bring in your spreadsheet")</td></tr>
+    <tr><td><strong>refs.emptyCopy</strong></td><td>Descriptive text in empty state</td></tr>
+    <tr><td><strong>refs.resultCount</strong></td><td>Row count display in the workspace footer</td></tr>
+    <tr><td><strong>refs.toast</strong></td><td>Toast notification element</td></tr>
+    <tr><td><strong>refs.toolsButton</strong></td><td>"Tools" button in the topbar</td></tr>
+    <tr><td><strong>refs.toolsCount</strong></td><td>Badge count on the Tools button</td></tr>
+    <tr><td><strong>refs.toolsOverlay</strong></td><td>Tools panel overlay container</td></tr>
+    <tr><td><strong>refs.toolsPanel</strong></td><td>Tools panel modal</td></tr>
+    <tr><td><strong>refs.toolsList</strong></td><td>Tools list container inside the panel</td></tr>
+    <tr><td><strong>refs.closeToolsButton</strong></td><td>"Close" button in the tools panel</td></tr>
+    <tr><td><strong>refs.installToolButton</strong></td><td>"Install tool" button in the tools panel</td></tr>
+    <tr><td><strong>refs.installToolInput</strong></td><td>Hidden file input for .sf file import</td></tr>
+    <tr><td><strong>refs.pageControls</strong></td><td>Pagination controls container</td></tr>
+    <tr><td><strong>refs.pageStatus</strong></td><td>"Page X of Y" text</td></tr>
+    <tr><td><strong>refs.previousPageButton</strong></td><td>"Previous" page button</td></tr>
+    <tr><td><strong>refs.nextPageButton</strong></td><td>"Next" page button</td></tr>
+    <tr><td><strong>refs.sidebar</strong></td><td>The <code>&lt;aside&gt;</code> sidebar element</td></tr>
+    <tr><td><strong>refs.sidebarToggle</strong></td><td>Sidebar collapse/expand toggle button</td></tr>
+    <tr><td><strong>refs.sidebarEdge</strong></td><td>Sidebar drag/click edge for toggling</td></tr>
+  </table>
+
+  <h3><code>sf.state</code> &mdash; App State</h3>
+  <p>Read the current internal state of the application. Most properties are read-only; modifying them directly may cause unexpected behavior. Use <code>sf.*</code> API methods instead.</p>
+  <table>
+    <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+    <tr><td><strong>state.fileName</strong></td><td>string</td><td>Currently loaded file name</td></tr>
+    <tr><td><strong>state.sourceType</strong></td><td>string</td><td>Source file type ("xlsx" or "csv")</td></tr>
+    <tr><td><strong>state.workbook</strong></td><td>object | null</td><td>Parsed XLSX workbook object</td></tr>
+    <tr><td><strong>state.sheetStates</strong></td><td>Map</td><td>Map of sheet state objects keyed by sheet name</td></tr>
+    <tr><td><strong>state.currentSheet</strong></td><td>string</td><td>Active worksheet name</td></tr>
+    <tr><td><strong>state.expandedGroups</strong></td><td>Set</td><td>Set of expanded group keys</td></tr>
+    <tr><td><strong>state.selectedIds</strong></td><td>Set</td><td>Set of selected row ID strings</td></tr>
+    <tr><td><strong>state.selectedCell</strong></td><td>object | null</td><td>Currently selected cell: <code>{ rowId, columnIndex }</code></td></tr>
+    <tr><td><strong>state.toastTimer</strong></td><td>timeout ID</td><td>Internal timer for toast auto-dismiss</td></tr>
+    <tr><td><strong>state.loading</strong></td><td>boolean</td><td>True while a file is being processed</td></tr>
+    <tr><td><strong>state.loadingFileName</strong></td><td>string</td><td>File name currently being loaded</td></tr>
+    <tr><td><strong>state.page</strong></td><td>number</td><td>Current page number (1-based)</td></tr>
+    <tr><td><strong>state.pageSize</strong></td><td>number</td><td>Rows per page (default 250)</td></tr>
+    <tr><td><strong>state.toolsPanelOpen</strong></td><td>boolean</td><td>True when the Tools panel is open</td></tr>
+    <tr><td><strong>state.activeToolIds</strong></td><td>Set</td><td>Set of active tool ID strings (not a single string)</td></tr>
+    <tr><td><strong>state.duplicateMode</strong></td><td>string</td><td>Current duplicate detection mode</td></tr>
+    <tr><td><strong>state.history</strong></td><td>array</td><td>Undo/redo history stack</td></tr>
+    <tr><td><strong>state.historyIndex</strong></td><td>number</td><td>Current position in the history stack</td></tr>
+  </table>
+
+  <h3>Check if a tool is active</h3>
+<pre><code>if (sf.state.activeToolIds.has("my-tool")) {
+  sf.showToast("My tool is running");
+}</code></pre>
+
+  <h3>Check if data is loaded</h3>
+<pre><code>if (!sf.state.fileName) {
+  sf.showToast("No file loaded yet.", "error");
+} else {
+  sf.showToast("File: " + sf.state.fileName);
+}</code></pre>
+
+  <h3>Access DOM refs</h3>
+<pre><code>// Update the table title
+sf.refs.tableTitle.textContent = "My Custom Title";
+
+// Check if sidebar is collapsed via state
+if (sf.isSidebarCollapsed()) {
+  sf.toggleSidebar();
+}</code></pre>
+
+  <!-- ─── SHEET OBJECT ──────────────────────────────────── -->
+  <h3><code>sf.currentSheet()</code> &mdash; Sheet Object</h3>
+  <p>Returns the currently active sheet object, or <code>null</code> if no data is loaded.</p>
+
+  <table>
+    <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+    <tr><td><strong>.name</strong></td><td>string</td><td>Worksheet name</td></tr>
+    <tr><td><strong>.sourceSheet</strong></td><td>object</td><td>Raw XLSX sheet object from SheetJS</td></tr>
+    <tr><td><strong>.width</strong></td><td>number</td><td>Number of columns</td></tr>
+    <tr><td><strong>.headerIndex</strong></td><td>number</td><td>Detected header row index</td></tr>
+    <tr><td><strong>.headerValues</strong></td><td>array</td><td>Raw header values from the source</td></tr>
+    <tr><td><strong>.headers</strong></td><td>string[]</td><td>Array of cleaned header label strings</td></tr>
+    <tr><td><strong>.prefixRows</strong></td><td>array</td><td>Rows above the header row</td></tr>
+    <tr><td><strong>.rows</strong></td><td>Row[]</td><td>Array of row objects (see Data API above)</td></tr>
+    <tr><td><strong>.groupCache</strong></td><td>Map</td><td>Cached grouping data</td></tr>
+    <tr><td><strong>.productColumn</strong></td><td>number | null</td><td>Detected product column index</td></tr>
+    <tr><td><strong>.locationColumn</strong></td><td>number | null</td><td>Detected location column index</td></tr>
+    <tr><td><strong>.quantityColumn</strong></td><td>number | null</td><td>Detected quantity column index</td></tr>
+  </table>
+
+<pre><code>var sheet = sf.currentSheet();
+if (sheet) {
+  sf.showToast("Sheet: " + sheet.name + " | " + sheet.headers.length + " columns | " + sheet.rows.length + " rows");
+
+  // Use detected columns
+  if (sheet.productColumn !== null) {
+    sf.showToast("Product column: " + sheet.headers[sheet.productColumn]);
+  }
+}</code></pre>
+
+  <!-- ─── HELPERS ───────────────────────────────────────── -->
+  <h2 id="helpers">Helpers</h2>
+  <p>Utility functions available through the <code>sf</code> namespace. These wrap base app globals into a clean interface.</p>
+
+  <table>
+    <tr><th>Method</th><th>Description</th></tr>
+    <tr><td><strong>sf.showToast(message, type)</strong></td><td>Show a toast notification. Types: <code>"success"</code>, <code>"error"</code>, or <code>""</code>.</td></tr>
+    <tr><td><strong>sf.refresh()</strong></td><td>Re-render the entire UI (table, stats, page controls). Call after modifying data.</td></tr>
+    <tr><td><strong>sf.renderTable()</strong></td><td>Re-render just the table without the full UI.</td></tr>
+    <tr><td><strong>sf.currentSheet()</strong></td><td>Returns the active sheet object or null.</td></tr>
+    <tr><td><strong>sf.rowById(id)</strong></td><td>Find a row by ID. Returns the row object or undefined.</td></tr>
+    <tr><td><strong>sf.escapeHTML(str)</strong></td><td>Escape a string for safe HTML insertion.</td></tr>
+    <tr><td><strong>sf.normalizeText(v)</strong></td><td>Lowercase, trim, collapse whitespace.</td></tr>
+    <tr><td><strong>sf.valueToString(v)</strong></td><td>Convert a cell value to a display string.</td></tr>
+    <tr><td><strong>sf.formatNumber(n)</strong></td><td>Format a number with locale separators (e.g. 1,234,567).</td></tr>
+    <tr><td><strong>sf.parseNumber(v)</strong></td><td>Parse a value as a number. Returns null if not numeric.</td></tr>
+    <tr><td><strong>sf.downloadText(text, filename, mime)</strong></td><td>Trigger a file download in the browser.</td></tr>
+  </table>
+
+  <h3>Download a file</h3>
+<pre><code>var data = sf.getVisibleRows().map(function(r) {
+  return r.values.join("\t");
+}).join("\n");
+sf.downloadText(data, "export.tsv", "text/tab-separated-values");</code></pre>
+
+  <h3>Format and display numbers</h3>
+<pre><code>var stats = sf.getColumnStats(3);
+sf.showToast("Sum: " + sf.formatNumber(stats.sum) + " | Avg: " + sf.formatNumber(Math.round(stats.avg)));</code></pre>
+
+  <!-- ─── DESIGN SYSTEM ─────────────────────────────────── -->
+  <h2 id="design-system">Design System</h2>
+  <p>Use the base app's CSS custom properties and utility classes to build tool UIs that look native. All properties are available to tool-generated elements.</p>
+
+  <h3>CSS Custom Properties</h3>
+  <table>
+    <tr><th>Property</th><th>Value</th><th>Usage</th></tr>
+    <tr><td><strong>--bg</strong></td><td><code>#f4f6f8</code></td><td>Page background</td></tr>
+    <tr><td><strong>--panel</strong></td><td><code>#ffffff</code></td><td>Card and panel backgrounds</td></tr>
+    <tr><td><strong>--panel-raised</strong></td><td></td><td>Raised surface (elevated panels)</td></tr>
+    <tr><td><strong>--line</strong></td><td><code>#e4e7ec</code></td><td>Borders and dividers</td></tr>
+    <tr><td><strong>--text</strong></td><td><code>#1f2937</code></td><td>Primary text</td></tr>
+    <tr><td><strong>--muted</strong></td><td><code>#667085</code></td><td>Secondary text</td></tr>
+    <tr><td><strong>--faint</strong></td><td><code>#98a2b3</code></td><td>Subtle/placeholder text</td></tr>
+    <tr><td><strong>--blue</strong></td><td><code>#2563eb</code></td><td>Primary accent</td></tr>
+    <tr><td><strong>--blue-soft</strong></td><td></td><td>Soft blue backgrounds</td></tr>
+    <tr><td><strong>--mint</strong></td><td><code>#15803d</code></td><td>Success/positive</td></tr>
+    <tr><td><strong>--mint-soft</strong></td><td></td><td>Soft green backgrounds</td></tr>
+    <tr><td><strong>--red</strong></td><td><code>#b42318</code></td><td>Error/destructive</td></tr>
+    <tr><td><strong>--red-soft</strong></td><td></td><td>Soft red backgrounds</td></tr>
+    <tr><td><strong>--amber</strong></td><td><code>#d97706</code></td><td>Warning</td></tr>
+    <tr><td><strong>--amber-soft</strong></td><td></td><td>Soft amber backgrounds</td></tr>
+    <tr><td><strong>--radius</strong></td><td><code>10px</code></td><td>Default border radius</td></tr>
+    <tr><td><strong>--radius-sm</strong></td><td></td><td>Small border radius</td></tr>
+    <tr><td><strong>--radius-md</strong></td><td></td><td>Medium border radius</td></tr>
+    <tr><td><strong>--radius-lg</strong></td><td></td><td>Large border radius</td></tr>
+    <tr><td><strong>--shadow</strong></td><td></td><td>Default box shadow</td></tr>
+    <tr><td><strong>--shadow-sm</strong></td><td></td><td>Small box shadow</td></tr>
+  </table>
+
+  <h3>Button Classes</h3>
+  <table>
+    <tr><th>Class</th><th>Usage</th></tr>
+    <tr><td><strong>.button</strong></td><td>Base button</td></tr>
+    <tr><td><strong>.button-primary</strong></td><td>Filled blue button (primary actions)</td></tr>
+    <tr><td><strong>.button-ghost</strong></td><td>Subtle outlined button</td></tr>
+    <tr><td><strong>.button-quiet</strong></td><td>Minimal border button</td></tr>
+    <tr><td><strong>.button-danger</strong></td><td>Red destructive button</td></tr>
+    <tr><td><strong>.button-small</strong></td><td>Compact size</td></tr>
+  </table>
+
+  <h3>SDK Utility Classes</h3>
+  <table>
+    <tr><th>Class</th><th>Usage</th></tr>
+    <tr><td><strong>.sf-card</strong></td><td>Card container with border and padding</td></tr>
+    <tr><td><strong>.sf-card-raised</strong></td><td>Raised card with shadow</td></tr>
+    <tr><td><strong>.sf-kicker</strong></td><td>Small uppercase label above headings</td></tr>
+    <tr><td><strong>.sf-label</strong></td><td>Form label styling</td></tr>
+    <tr><td><strong>.sf-form-row</strong></td><td>Form field row layout</td></tr>
+    <tr><td><strong>.sf-badge</strong></td><td>Inline badge (neutral)</td></tr>
+    <tr><td><strong>.sf-badge-blue</strong></td><td>Blue badge</td></tr>
+    <tr><td><strong>.sf-badge-green</strong></td><td>Green badge</td></tr>
+    <tr><td><strong>.sf-badge-amber</strong></td><td>Amber badge</td></tr>
+    <tr><td><strong>.sf-badge-red</strong></td><td>Red badge</td></tr>
+    <tr><td><strong>.sf-divider</strong></td><td>Horizontal rule/divider</td></tr>
+    <tr><td><strong>.sf-empty</strong></td><td>Empty state placeholder</td></tr>
+    <tr><td><strong>.sf-stack</strong></td><td>Vertical stack layout</td></tr>
+    <tr><td><strong>.sf-row</strong></td><td>Horizontal row layout</td></tr>
+    <tr><td><strong>.sf-row-between</strong></td><td>Row with space-between</td></tr>
+    <tr><td><strong>.sf-text-muted</strong></td><td>Muted text color</td></tr>
+    <tr><td><strong>.sf-text-faint</strong></td><td>Faint text color</td></tr>
+    <tr><td><strong>.sf-text-sm</strong></td><td>Small text size</td></tr>
+    <tr><td><strong>.sf-text-xs</strong></td><td>Extra-small text size</td></tr>
+    <tr><td><strong>.sf-font-mono</strong></td><td>Monospace font</td></tr>
+    <tr><td><strong>.sf-w-full</strong></td><td>Width: 100%</td></tr>
+    <tr><td><strong>.sf-truncate</strong></td><td>Text truncation with ellipsis</td></tr>
+  </table>
+
+  <h3>Using the design system</h3>
+<pre><code>registerTool({
+  id: "design-demo",
+  name: "Design Demo",
+  icon: "\uD83C\uDFA8",
+
+  activate: function() {
+    this._panel = document.createElement("div");
+    this._panel.className = "sf-card";
+    this._panel.style.margin = "18px 0";
+    this._panel.innerHTML =
+      '&lt;div class="sf-kicker"&gt;Design System&lt;/div&gt;' +
+      '&lt;h3 style="margin:4px 0 12px;font-size:16px"&gt;Styled Tool Panel&lt;/h3&gt;' +
+      '&lt;div class="sf-row" style="gap:8px;margin-bottom:12px"&gt;' +
+      '  &lt;span class="sf-badge sf-badge-blue"&gt;Active&lt;/span&gt;' +
+      '  &lt;span class="sf-badge sf-badge-green"&gt;Synced&lt;/span&gt;' +
+      '  &lt;span class="sf-badge sf-badge-amber"&gt;Pending&lt;/span&gt;' +
+        '&lt;span class="sf-badge sf-badge-red"&gt;Error&lt;/span&gt;' +
+      '&lt;/div&gt;' +
+      '&lt;div class="sf-form-row"&gt;' +
+      '  &lt;label class="sf-label"&gt;Filter value&lt;/label&gt;' +
+      '  &lt;input type="text" class="sf-w-full" placeholder="Enter text..."&gt;' +
+      '&lt;/div&gt;' +
+      '&lt;div class="sf-divider" style="margin:12px 0"&gt;&lt;/div&gt;' +
+      '&lt;div class="sf-row-between"&gt;' +
+      '  &lt;span class="sf-text-sm sf-text-muted"&gt;3 rows matched&lt;/span&gt;' +
+      '  &lt;button class="button button-primary button-small"&gt;Apply&lt;/button&gt;' +
+      '&lt;/div&gt;';
+    document.getElementById("toolPanelsSlot").appendChild(this._panel);
+  },
+
+  deactivate: function() {
+    if (this._panel) { this._panel.remove(); this._panel = null; }
+  }
+});</code></pre>
+
+  <!-- ─── EXAMPLE: TOPBAR BUTTON ────────────────────────── -->
+  <h2 id="example-topbar-button">Example: Topbar Button</h2>
+  <p>Add a button to the topbar that counts visible rows and shows a toast. Uses <code>sf.addTopbarButton()</code> for clean injection and cleanup.</p>
+<pre><code>registerTool({
+  id: "row-counter",
+  name: "Row Counter",
+  icon: "#\uFE0F\u20E3",
+  description: "Shows a count of all visible rows.",
+
+  activate: function() {
+    sf.addTopbarButton({
+      id: "row-counter-btn",
+      label: "Count Rows",
+      icon: "#\uFE0F\u20E3",
+      onClick: function() {
+        var rows = sf.getVisibleRows();
+        var sheet = sf.currentSheet();
+        if (!sheet) { sf.showToast("No sheet loaded.", "error"); return; }
+        sf.showToast("Visible: " + rows.length + " / " + sf.getAllRows().length + " rows", "success");
+      }
+    });
+  },
+
+  deactivate: function() {
+    sf.removeTopbarButton("row-counter-btn");
+  }
+});</code></pre>
+
+  <!-- ─── EXAMPLE: DATA FILTER TOOL ─────────────────────── -->
+  <h2 id="example-data-filter">Example: Data Filter Tool</h2>
+  <p>A tool with a topbar dropdown to filter rows by a column value, plus a panel showing filter results. Demonstrates the data API, dropdown API, and panel slot.</p>
+<pre><code>registerTool({
+  id: "column-filter",
+  name: "Column Filter",
+  icon: "\uD83D\uDD0D",
+  description: "Filter rows by column value using a dropdown.",
+
+  _panel: null,
+  _filteredRows: [],
+
+  activate: function() {
+    var self = this;
+
+    // Build the panel UI
+    this._panel = document.createElement("div");
+    this._panel.style.cssText = "margin:18px 0;padding:16px 20px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)";
+    this._panel.innerHTML =
+      '&lt;div class="sf-kicker"&gt;Column Filter&lt;/div&gt;' +
+      '&lt;h3 style="margin:4px 0 12px;font-size:16px"&gt;Filter Results&lt;/h3&gt;' +
+      '&lt;div id="cf-result" class="sf-text-sm sf-text-muted"&gt;No filter applied. Use the Filter dropdown above.&lt;/div&gt;';
+    document.getElementById("toolPanelsSlot").appendChild(this._panel);
+
+    // Build dropdown
+    sf.addTopbarDropdown({
+      id: "column-filter-dropdown",
+      label: "Filter",
+      items: [
+        { label: "Show Empty Rows", icon: "\u2B1C", onClick: function() { self._filterEmpty(); } },
+        { label: "Show Non-Empty Rows", icon: "\u2705", onClick: function() { self._filterNonEmpty(); } },
+        { divider: true },
+        { label: "Show All Rows", icon: "\uD83D\uDD04", onClick: function() { self._showAll(); } }
+      ]
+    });
+  },
+
+  deactivate: function() {
+    sf.removeTopbarDropdown("column-filter-dropdown");
+    if (this._panel) { this._panel.remove(); this._panel = null; }
+  },
+
+  _filterEmpty: function() {
+    var sheet = sf.currentSheet();
+    if (!sheet) { sf.showToast("No data loaded.", "error"); return; }
+    var count = 0;
+    sheet.rows.forEach(function(row) {
+      if (row.blank) { sf.hideRow(row.id); } else { sf.showRow(row.id); count++; }
+    });
+    sf.refresh();
+    var el = document.getElementById("cf-result");
+    if (el) el.innerHTML = '&lt;strong&gt;' + count + ' non-empty&lt;/strong&gt; rows shown. Empty rows hidden.';
+  },
+
+  _filterNonEmpty: function() {
+    var sheet = sf.currentSheet();
+    if (!sheet) { sf.showToast("No data loaded.", "error"); return; }
+    var count = 0;
+    sheet.rows.forEach(function(row) {
+      if (!row.blank) { sf.hideRow(row.id); } else { sf.showRow(row.id); count++; }
+    });
+    sf.refresh();
+    var el = document.getElementById("cf-result");
+    if (el) el.innerHTML = '&lt;strong&gt;' + count + ' empty&lt;/strong&gt; rows shown. Non-empty rows hidden.';
+  },
+
+  _showAll: function() {
+    var sheet = sf.currentSheet();
+    if (!sheet) return;
+    sheet.rows.forEach(function(row) { sf.showRow(row.id); });
+    sf.refresh();
+    var el = document.getElementById("cf-result");
+    if (el) el.innerHTML = 'All rows visible.';
+  }
+});</code></pre>
+
+  <!-- ─── EXAMPLE: MODAL DIALOG ─────────────────────────── -->
+  <h2 id="example-modal">Example: Modal Dialog</h2>
+  <p>A tool that shows a settings modal with form inputs, confirm, and prompt dialogs. Demonstrates the full modal API.</p>
+<pre><code>registerTool({
+  id: "settings-panel",
+  name: "Settings Panel",
+  icon: "\u2699\uFE0F",
+  description: "Open settings via modal dialogs.",
+
+  _dropdown: null,
+  _threshold: 10,
+
+  activate: function() {
+    var self = this;
+
+    sf.addTopbarDropdown({
+      id: "settings-dropdown",
+      label: "Settings",
+      items: [
+        { label: "Edit Threshold", icon: "\u270F\uFE0F", onClick: function() { self._editThreshold(); } },
+        { label: "Reset to Defaults", icon: "\uD83D\uDD04", onClick: function() { self._resetDefaults(); } },
+        { divider: true },
+        { label: "About", icon: "\u2139\uFE0F", onClick: function() { self._showAbout(); } }
+      ]
+    });
+  },
+
+  deactivate: function() {
+    sf.removeTopbarDropdown("settings-dropdown");
+  },
+
+  _editThreshold: function() {
+    var self = this;
+    sf.prompt("Enter new threshold value:", String(this._threshold)).then(function(val) {
+      if (val !== null) {
+        var num = sf.parseNumber(val);
+        if (num !== null && num >= 0) {
+          self._threshold = num;
+          sf.showToast("Threshold set to " + sf.formatNumber(num), "success");
+        } else {
+          sf.showToast("Invalid number.", "error");
+        }
+      }
+    });
+  },
+
+  _resetDefaults: function() {
+    var self = this;
+    sf.confirm("Reset all settings to defaults?").then(function(ok) {
+      if (ok) {
+        self._threshold = 10;
+        sf.showToast("Settings reset.", "success");
+      }
+    });
+  },
+
+  _showAbout: function() {
+    sf.openModal({
+      title: "About Settings Panel",
+      content:
+        '&lt;div style="display:flex;flex-direction:column;gap:8px"&gt;' +
+        '&lt;p style="color:var(--muted);font-size:14px;margin:0"&gt;A demo tool showing the modal system.&lt;/p&gt;' +
+        '&lt;p style="color:var(--muted);font-size:14px;margin:0"&gt;Current threshold: &lt;strong&gt;' + sf.formatNumber(this._threshold) + '&lt;/strong&gt;&lt;/p&gt;' +
+        '&lt;/div&gt;',
+      width: 400,
+      buttons: [
+        { label: "Close", type: "ghost" }
+      ]
+    });
+  }
+});</code></pre>
+
+  <!-- ─── EXAMPLE: SIDEBAR WIDGET ───────────────────────── -->
+  <h2 id="example-sidebar-widget">Example: Sidebar Widget</h2>
+  <p>A tool that adds a live-updating stats widget to the sidebar and shows a topbar button. Demonstrates the sidebar API and event-driven updates.</p>
+<pre><code>registerTool({
+  id: "live-stats",
+  name: "Live Stats",
+  icon: "\uD83D\uDCC8",
+  description: "Live row statistics in the sidebar.",
+
+  _timer: null,
+  _onChange: null,
+
+  activate: function() {
+    var self = this;
+
+    // Add sidebar section
+    sf.addSidebarSection({
+      id: "live-stats-section",
+      label: "Live Stats",
+      icon: "\uD83D\uDCC8",
+      content:
+        '&lt;div id="ls-content" style="font-size:12px;color:var(--muted)"&gt;' +
+        '&lt;div&gt;Total: &lt;strong id="ls-total"&gt;0&lt;/strong&gt;&lt;/div&gt;' +
+        '&lt;div&gt;Visible: &lt;strong id="ls-visible"&gt;0&lt;/strong&gt;&lt;/div&gt;' +
+        '&lt;div&gt;Hidden: &lt;strong id="ls-hidden"&gt;0&lt;/strong&gt;&lt;/div&gt;' +
+        '&lt;div&gt;Selected: &lt;strong id="ls-selected"&gt;0&lt;/strong&gt;&lt;/div&gt;' +
+        '&lt;/div&gt;'
+    });
+
+    // Add a topbar button
+    sf.addTopbarButton({
+      id: "live-stats-refresh",
+      label: "Refresh Stats",
+      icon: "\uD83D\uDD04",
+      onClick: function() { self._update(); }
+    });
+
+    // Listen for data changes
+    this._onChange = function() { self._update(); };
+    sf.on("data:modified", this._onChange);
+    sf.on("row:hidden", this._onChange);
+    sf.on("row:shown", this._onChange);
+    sf.on("selection:changed", this._onChange);
+
+    // Poll every 2 seconds
+    this._timer = setInterval(function() { self._update(); }, 2000);
+
+    this._update();
+  },
+
+  deactivate: function() {
+    sf.removeSidebarSection("live-stats-section");
+    sf.removeTopbarButton("live-stats-refresh");
+    if (this._onChange) {
+      sf.off("data:modified", this._onChange);
+      sf.off("row:hidden", this._onChange);
+      sf.off("row:shown", this._onChange);
+      sf.off("selection:changed", this._onChange);
+      this._onChange = null;
+    }
+    if (this._timer) { clearInterval(this._timer); this._timer = null; }
+  },
+
+  _update: function() {
+    var total = sf.getAllRows().length;
+    var visible = sf.getVisibleRows().length;
+    var hidden = total - visible;
+    var selected = sf.state.selectedIds.size;
+
+    var t = document.getElementById("ls-total");
+    var v = document.getElementById("ls-visible");
+    var h = document.getElementById("ls-hidden");
+    var s = document.getElementById("ls-selected");
+    if (t) t.textContent = sf.formatNumber(total);
+    if (v) v.textContent = sf.formatNumber(visible);
+    if (h) h.textContent = sf.formatNumber(hidden);
+    if (s) s.textContent = sf.formatNumber(selected);
+  }
+});</code></pre>
+
+  <!-- ─── EXAMPLE: FULL TOOL ────────────────────────────── -->
+  <h2 id="example-full-tool">Example: Full Tool (All 5 Slots)</h2>
+  <p>A complete tool that uses all five injection slots: action button, dropdown, extra buttons, panel, and sidebar section. Demonstrates the full power of the SDK.</p>
+<pre><code>var _dtStyle = document.createElement("style");
+_dtStyle.textContent =
+  '.dt-panel{margin:18px 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow-sm)}' +
+  '.dt-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}' +
+  '.dt-body{padding:14px 18px}' +
+  '.dt-rule{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}' +
+  '.dt-rule:last-child{border-bottom:none}';
+document.head.appendChild(_dtStyle);
+
+registerTool({
+  id: "data-validator",
+  name: "Data Validator",
+  icon: "\u2705",
+  description: "Validate spreadsheet data against custom rules.",
+
+  _panel: null,
+  _rules: [],
+  _onData: null,
+
+  activate: function() {
+    var self = this;
+
+    // SLOT 1: toolActionSlot — primary action
+    sf.addTopbarButton({
+      id: "dv-validate",
+      label: "Validate",
+      icon: "\u2705",
+      onClick: function() { self._runValidation(); }
+    });
+
+    // SLOT 2: toolDropdownSlot — dropdown menu
+    sf.addTopbarDropdown({
+      id: "dv-menu",
+      label: "Validator",
+      items: [
+        { label: "Add Empty-Check Rule", icon: "\u2B1C", onClick: function() { self._addRule("empty-check"); } },
+        { label: "Add Numeric Rule", icon: "\uD83D\uDCCA", onClick: function() { self._addRule("numeric"); } },
+        { divider: true },
+        { label: "Clear All Rules", icon: "\uD83D\uDDD1\uFE0F", onClick: function() { self._clearRules(); } },
+        { label: "Run Validation", icon: "\u25B6\uFE0F", onClick: function() { self._runValidation(); } }
+      ]
+    });
+
+    // SLOT 3: toolButtonsSlot — extra button
+    var btnSlot = document.getElementById("toolButtonsSlot");
+    this._clearBtn = document.createElement("button");
+    this._clearBtn.className = "button button-ghost button-small";
+    this._clearBtn.textContent = "\uD83D\uDDD1\uFE0F Clear Results";
+    this._clearBtn.addEventListener("click", function() { self._clearResults(); });
+    btnSlot.appendChild(this._clearBtn);
+
+    // SLOT 4: toolPanelsSlot — control panel
+    this._panel = document.createElement("div");
+    this._panel.className = "dt-panel";
+    this._panel.innerHTML =
+      '&lt;div class="dt-head"&gt;' +
+      '  &lt;div&gt;&lt;div class="sf-kicker"&gt;Data Validation&lt;/div&gt;' +
+      '  &lt;h3 style="margin:4px 0 0;font-size:16px"&gt;Validation Rules&lt;/h3&gt;&lt;/div&gt;' +
+      '  &lt;span class="sf-badge sf-badge-blue" id="dv-count"&gt;0 rules&lt;/span&gt;' +
+      '&lt;/div&gt;' +
+      '&lt;div class="dt-body" id="dv-rules"&gt;' +
+      '  &lt;p class="sf-text-sm sf-text-muted"&gt;No rules yet. Use the Validator dropdown to add rules.&lt;/p&gt;' +
+      '&lt;/div&gt;' +
+      '&lt;div class="dt-body" id="dv-results" style="border-top:1px solid var(--line);display:none"&gt;' +
+      '  &lt;div class="sf-kicker"&gt;Results&lt;/div&gt;' +
+      '  &lt;div id="dv-results-content" style="margin-top:8px"&gt;&lt;/div&gt;' +
+      '&lt;/div&gt;';
+    document.getElementById("toolPanelsSlot").appendChild(this._panel);
+
+    // SLOT 5: toolSidebarSlot — sidebar widget
+    sf.addSidebarSection({
+      id: "dv-sidebar",
+      label: "Validator",
+      icon: "\u2705",
+      content:
+        '&lt;div id="dv-sidebar-status" style="font-size:12px;color:var(--muted)"&gt;' +
+        '&lt;div&gt;Rules: &lt;strong id="dv-s-rules"&gt;0&lt;/strong&gt;&lt;/div&gt;' +
+        '&lt;div&gt;Errors: &lt;strong id="dv-s-errors" style="color:var(--red)"&gt;0&lt;/strong&gt;&lt;/div&gt;' +
+        '&lt;div&gt;Passed: &lt;strong id="dv-s-passed" style="color:var(--mint)"&gt;0&lt;/strong&gt;&lt;/div&gt;' +
+        '&lt;/div&gt;'
+    });
+
+    // Listen for data changes to re-validate
+    this._onData = function() {
+      if (self._rules.length > 0) self._runValidation();
+    };
+    sf.on("data:modified", this._onData);
+  },
+
+  deactivate: function() {
+    sf.removeTopbarButton("dv-validate");
+    sf.removeTopbarDropdown("dv-menu");
+    sf.removeSidebarSection("dv-sidebar");
+    if (this._clearBtn) { this._clearBtn.remove(); this._clearBtn = null; }
+    if (this._panel) { this._panel.remove(); this._panel = null; }
+    if (this._onData) { sf.off("data:modified", this._onData); this._onData = null; }
+    this._rules = [];
+  },
+
+  _addRule: function(type) {
+    this._rules.push({ type: type, column: 0 });
+    this._renderRules();
+    this._updateSidebar();
+    sf.showToast(type + " rule added.", "success");
+  },
+
+  _clearRules: function() {
+    this._rules = [];
+    this._renderRules();
+    this._updateSidebar();
+    this._clearResults();
+    sf.showToast("All rules cleared.");
+  },
+
+  _renderRules: function() {
+    var container = this._panel.querySelector("#dv-rules");
+    var countEl = this._panel.querySelector("#dv-count");
+    if (!this._rules.length) {
+      container.innerHTML = '&lt;p class="sf-text-sm sf-text-muted"&gt;No rules yet.&lt;/p&gt;';
+      if (countEl) countEl.textContent = "0 rules";
+      return;
+    }
+    if (countEl) countEl.textContent = this._rules.length + " rule" + (this._rules.length > 1 ? "s" : "");
+    container.innerHTML = this._rules.map(function(r, i) {
+      var label = r.type === "empty-check" ? "Column must not be empty" : "Column must be numeric";
+      return '&lt;div class="dt-rule"&gt;' +
+        '&lt;span class="sf-badge sf-badge-blue"&gt;' + (i + 1) + '&lt;/span&gt;' +
+        '&lt;span style="flex:1;color:var(--muted)"&gt;' + label + '&lt;/span&gt;' +
+        '&lt;button class="button button-ghost button-small" data-dv-remove="' + i + '"&gt;\u00D7&lt;/button&gt;' +
+        '&lt;/div&gt;';
+    }).join("");
+    var self = this;
+    container.querySelectorAll("[data-dv-remove]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        self._rules.splice(parseInt(btn.dataset.dvRemove), 1);
+        self._renderRules();
+        self._updateSidebar();
+      });
+    });
+  },
+
+  _runValidation: function() {
+    if (!this._rules.length) return;
+    var errors = 0;
+    var passed = 0;
+    var rows = sf.getVisibleRows();
+
+    rows.forEach(function(row) {
+      var rowOk = true;
+      // Simplified: check first rule against first column
+      // In production you'd check each rule against its target column
+      rowOk = true; // placeholder for per-rule logic
+      if (rowOk) passed++; else errors++;
+    });
+
+    // Update results panel
+    var resultsEl = this._panel.querySelector("#dv-results");
+    var contentEl = this._panel.querySelector("#dv-results-content");
+    if (resultsEl) resultsEl.style.display = "block";
+    if (contentEl) {
+      contentEl.innerHTML =
+        '&lt;div class="sf-row" style="gap:16px;font-size:13px"&gt;' +
+        '  &lt;div&gt;&lt;span style="color:var(--red);font-weight:700"&gt;' + errors + '&lt;/span&gt; &lt;span class="sf-text-muted"&gt;errors&lt;/span&gt;&lt;/div&gt;' +
+        '  &lt;div&gt;&lt;span style="color:var(--mint);font-weight:700"&gt;' + passed + '&lt;/span&gt; &lt;span class="sf-text-muted"&gt;passed&lt;/span&gt;&lt;/div&gt;' +
+        '&lt;/div&gt;';
+    }
+
+    this._updateSidebar(errors, passed);
+    sf.showToast("Validation: " + errors + " errors, " + passed + " passed.", errors > 0 ? "error" : "success");
+  },
+
+  _clearResults: function() {
+    var resultsEl = this._panel ? this._panel.querySelector("#dv-results") : null;
+    if (resultsEl) resultsEl.style.display = "none";
+    this._updateSidebar();
+  },
+
+  _updateSidebar: function(errors, passed) {
+    var r = document.getElementById("dv-s-rules");
+    var e = document.getElementById("dv-s-errors");
+    var p = document.getElementById("dv-s-passed");
+    if (r) r.textContent = this._rules.length;
+    if (e) e.textContent = errors || 0;
+    if (p) p.textContent = passed || 0;
+  }
+});</code></pre>
+
+  <!-- ─── CLASH DETECTION ────────────────────────────────── -->
+  <h2 id="clash-detection">Clash Detection System</h2>
+  <p style="margin-bottom:16px;color:var(--muted);font-size:14px">Sheetflow includes a built-in clash detection system that scans tools for common conflicts before installation and warns about potential issues when tools are activated together.</p>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">What Gets Checked on Install</div></div>
+    <div class="card-desc">
+      Your tool's code is scanned for forbidden patterns before registration:
+      <ul style="margin:8px 0 0 18px;font-size:13px;color:var(--muted)">
+        <li><code>window.refresh =</code> &mdash; Must use <code>chainRefresh()</code> / <code>unchainRefresh()</code></li>
+        <li><code>window.renderTable =</code> &mdash; Must use <code>chainRefresh()</code> hook instead</li>
+        <li><code>eval()</code> &mdash; Blocked for security</li>
+        <li><code>document.write()</code> &mdash; Blocked for security</li>
+        <li><code>document.cookie =</code> &mdash; Warned against</li>
+        <li>Overwriting base app function names (<code>refresh</code>, <code>renderTable</code>, etc.) &mdash; Blocked</li>
+        <li>Using unprefixed element IDs that clash with the base app (50+ known IDs checked)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">What Gets Checked on Activation</div></div>
+    <div class="card-desc">
+      When you open a tool, the system checks for clashes with other active tools:
+      <ul style="margin:8px 0 0 18px;font-size:13px;color:var(--muted)">
+        <li><strong>Render override clash:</strong> Both tools replace <code>tableHead.innerHTML</code> / <code>tableBody.innerHTML</code> &mdash; the last registered hook wins</li>
+        <li><strong>Event listener overload:</strong> Both tools add many <code>addEventListener</code> calls (&gt;3 each) to the same elements</li>
+      </ul>
+      Warnings appear in the browser console and as badges in the Tools panel.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">How to Avoid Clashes</div></div>
+    <div class="card-desc">
+      <ol style="margin:8px 0 0 18px;font-size:13px;color:var(--muted)">
+        <li><strong>Prefix all IDs:</strong> Use <code>yourToolId-elementName</code> for every <code>getElementById</code> and generated <code>id=</code> attribute</li>
+        <li><strong>Use the <code>sf.*</code> API:</strong> Topbar, sidebar, and modal APIs handle their own DOM management and won't clash</li>
+        <li><strong>Namespace your state:</strong> Store tool state on <code>this</code> inside <code>registerTool()</code>, not in global variables</li>
+        <li><strong>Clean up listeners:</strong> Store event references and remove them in <code>deactivate()</code>; use <code>sf.on()</code>/<code>sf.off()</code> for app events</li>
+        <li><strong>Don't override globals:</strong> Never redefine <code>refresh</code>, <code>renderTable</code>, or other base functions</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ─── BEST PRACTICES ────────────────────────────────── -->
+  <h2 id="best-practices">Best Practices</h2>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Use the sf.* API over direct DOM manipulation</div></div>
+    <div class="card-desc">The SDK provides <code>sf.addTopbarButton()</code>, <code>sf.addTopbarDropdown()</code>, <code>sf.addSidebarSection()</code>, <code>sf.openModal()</code>, and <code>sf.registerShortcut()</code>. These manage injection and cleanup automatically, reducing boilerplate and preventing clashes.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Always prefix element IDs</div></div>
+    <div class="card-desc">If you create elements with IDs, use your tool's ID as a prefix: <code>dv-validate</code>, <code>cr-color</code>, <code>fr-findInput</code>. This prevents collisions with other tools and the base app.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Clean up in deactivate()</div></div>
+    <div class="card-desc">Remove all DOM elements you created, unsubscribe event listeners (both <code>sf.on()</code> and native), clear intervals/timeouts, unregister keyboard shortcuts, and reset your state. The user may open your tool multiple times.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Make activate() idempotent</div></div>
+    <div class="card-desc">Check if elements already exist before creating them. If <code>activate()</code> is called twice without <code>deactivate()</code> in between, don't duplicate UI. The <code>sf.*</code> topbar/sidebar APIs handle this automatically by replacing existing elements with the same ID.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Use the design system classes</div></div>
+    <div class="card-desc">Use <code>.sf-card</code>, <code>.sf-kicker</code>, <code>.sf-badge</code>, <code>.sf-form-row</code>, <code>.sf-row</code>, <code>.sf-divider</code>, and button classes like <code>.button-primary</code> for a consistent look. Use CSS custom properties like <code>var(--line)</code>, <code>var(--muted)</code>, etc. instead of hardcoded colors.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Call sf.refresh() after data changes</div></div>
+    <div class="card-desc">If your tool modifies spreadsheet data (row values, hidden state, inserts, deletes), call <code>sf.refresh()</code> to re-render the base app's table, stats, and page controls.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Keep your tool self-contained</div></div>
+    <div class="card-desc">All your CSS, HTML generation, state, and logic live in your tool's code string. Don't assume any particular other tool is installed. Don't depend on other tools' globals. Communicate through the event bus if needed.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Use the event bus for cross-tool communication</div></div>
+    <div class="card-desc">Don't call other tools' functions directly. Emit and listen for custom events via <code>sf.emit()</code> and <code>sf.on()</code>. This keeps tools decoupled and prevents hard dependencies.</div>
+  </div>
+
+  <!-- ─── TROUBLESHOOTING ───────────────────────────────── -->
+  <h2 id="troubleshooting">Troubleshooting</h2>
+
+  <table>
+    <tr><th>Problem</th><th>Fix</th></tr>
+    <tr>
+      <td><strong>Tool doesn't appear in the list</strong></td>
+      <td>Make sure your code calls <code>registerTool()</code> and the .sf file has valid JSON with <code>"format": "sheetflow-tool"</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>"Tool code error" on install</strong></td>
+      <td>Open the browser console (F12) to see the syntax error in your code. Fix it, re-export the .sf file.</td>
+    </tr>
+    <tr>
+      <td><strong>"Tool failed security scan" on install</strong></td>
+      <td>Open the browser console to see which pattern was blocked. Common causes: <code>eval()</code>, <code>window.refresh =</code>, using base app element IDs without prefixing.</td>
+    </tr>
+    <tr>
+      <td><strong>Button doesn't appear in top bar</strong></td>
+      <td>Use <code>sf.addTopbarButton()</code> or ensure you're appending to <code>toolActionSlot</code> / <code>toolButtonsSlot</code> inside <code>activate()</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Panel doesn't show above workspace</strong></td>
+      <td>Use <code>document.getElementById("toolPanelsSlot")</code>. Make sure <code>activate()</code> is being called (check the Tools panel).</td>
+    </tr>
+    <tr>
+      <td><strong>UI stays after closing tool</strong></td>
+      <td>You're not cleaning up in <code>deactivate()</code>. Remove all DOM elements you created and call <code>sf.removeTopbarButton()</code> / <code>sf.removeTopbarDropdown()</code> / <code>sf.removeSidebarSection()</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>Tool warning badges in Tools panel</strong></td>
+      <td>Your tool has potential clashes with another installed tool. Hover the badge to see details. Both tools will still work, but rendering may conflict.</td>
+    </tr>
+    <tr>
+      <td><strong>Keyboard shortcut doesn't fire</strong></td>
+      <td>Make sure you registered it with <code>sf.registerShortcut()</code>. Check the combo format: use <code>Ctrl+Shift+F</code> (not <code>Control+Shift+KeyF</code>). Make sure the shortcut is registered (you may need to call registration inside <code>activate()</code>).</td>
+    </tr>
+    <tr>
+      <td><strong>sf.currentSheet() returns null</strong></td>
+      <td>No data is loaded. Check <code>sf.state.fileName</code> first, or listen for <code>sf.on("sheet:loaded", ...)</code> before accessing sheet data.</td>
+    </tr>
+    <tr>
+      <td><strong>Modal doesn't open</strong></td>
+      <td>Check the console for errors. Ensure your <code>sf.openModal()</code> options are correct. The <code>content</code> parameter accepts an HTML string or a DOM element.</td>
+    </tr>
+    <tr>
+      <td><strong>Null reference errors</strong></td>
+      <td>Wrap DOM access in null checks. Elements may not exist if no sheet is loaded. Use <code>sf.currentSheet()</code> before accessing sheet data, and check element existence before reading properties.</td>
+    </tr>
+    <tr>
+      <td><strong>Data changes don't reflect in the table</strong></td>
+      <td>You forgot to call <code>sf.refresh()</code> after modifying data. The base app only re-renders when told to.</td>
+    </tr>
+  </table>
+
+  <div style="margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;text-align:center">
+    Sheetflow Tool Development Guide &middot; networKING &middot; All rights reserved
+  </div>
+
+</main>
+
+<script>
+  // Active nav link tracking
+  var links = document.querySelectorAll(".nav-link");
+  var sections = [];
+  links.forEach(function(link) {
+    var id = link.getAttribute("href").replace("#", "");
+    var el = document.getElementById(id);
+    if (el) sections.push({ el: el, link: link });
+  });
+  function updateNav() {
+    var scrollY = window.scrollY + 120;
+    var current = sections[0];
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].el.offsetTop <= scrollY) current = sections[i];
+    }
+    links.forEach(function(l) { l.classList.remove("active"); });
+    if (current) current.link.classList.add("active");
+  }
+  window.addEventListener("scroll", updateNav);
+  updateNav();
+</script>
+
+</body>
+</html>

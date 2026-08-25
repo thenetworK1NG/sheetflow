@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c1a3b">
+  <meta name="description" content="An extensible spreadsheet workspace with a full SDK. Build tools, extend the UI, and automate workflows — all in-browser.">
+  <meta name="application-name" content="Sheetflow">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sheetflow">
+  <link rel="manifest" href="./Main/manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./Main/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./Main/icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Sheetflow | The extensible spreadsheet workspace</title>
+</head>
+<body>
+  <div class="site-shell">
+
+    <header class="site-header">
+      <nav class="nav container" aria-label="Primary navigation">
+        <a class="brand" href="./index.html" aria-label="Sheetflow home">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-name">sheetflow</span>
+        </a>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#platform">Platform</a>
+          <a href="#tools">Build Tools</a>
+          <a href="#privacy">Privacy</a>
+          <a href="./docs/tool-development.html">SDK Docs</a>
+        </div>
+        <div class="nav-actions">
+          <button class="button button-ghost install-button" id="installButton" type="button">Install app</button>
+          <a class="button button-primary button-nav" href="./Main/index.html">Open workspace &#8599;</a>
+        </div>
+        <button class="menu-button" id="menuButton" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="mobileNav">
+          <span></span><span></span>
+        </button>
+      </nav>
+      <div class="mobile-nav container" id="mobileNav" hidden>
+        <a href="#features">Features</a>
+        <a href="#platform">Platform</a>
+        <a href="#tools">Build Tools</a>
+        <a href="#privacy">Privacy</a>
+        <a href="./docs/tool-development.html">SDK Docs</a>
+        <a href="./Main/index.html">Open workspace &#8599;</a>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- ── Hero ──────────────────────────────────── -->
+      <section class="hero">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <div class="hero-badge"><span class="hero-badge-dot"></span> Extensible SDK platform</div>
+            <h1>Build on your <em>spreadsheets.</em></h1>
+            <p class="hero-sub">Sheetflow is a workspace and SDK in one. Review data, extend the UI with custom tools, and automate workflows — all running locally in your browser. Nothing leaves the machine.</p>
+            <div class="hero-actions">
+              <a class="button button-white button-large" href="./Main/index.html">Open workspace &#8594;</a>
+              <a class="button button-ghost-light button-large" href="./docs/tool-development.html">Read the SDK &#8594;</a>
+            </div>
+            <div class="hero-trust">
+              <span class="trust-item"><span class="trust-check">&#10003;</span> No account required</span>
+              <span class="trust-item"><span class="trust-check">&#10003;</span> 8 modular SDK files</span>
+              <span class="trust-item"><span class="trust-check">&#10003;</span> 40+ API methods</span>
+            </div>
+            <p class="install-status" id="installStatus" role="status" aria-live="polite"></p>
+          </div>
+          <div class="hero-visual">
+            <div class="preview-window">
+              <div class="preview-chrome">
+                <div class="preview-dots"><span></span><span></span><span></span></div>
+                <div class="preview-title">Sheetflow workspace</div>
+                <div class="preview-badge"><span class="preview-dot-green"></span> Local</div>
+              </div>
+              <div class="preview-body">
+                <div class="preview-side">
+                  <div class="preview-side-kicker">Workspace</div>
+                  <div class="preview-upload-box">
+                    <span class="preview-upload-icon">+</span>
+                    <strong>Import a sheet</strong>
+                    <small>XLSX / CSV</small>
+                  </div>
+                  <div class="preview-divider"></div>
+                  <div class="preview-file-row"><span class="preview-file-badge">XLS</span><span>Q3 inventory.xlsx</span></div>
+                  <div class="preview-side-foot"><span class="preview-dot-green"></span> Nothing uploaded</div>
+                </div>
+                <div class="preview-main">
+                  <div class="preview-top-row">
+                    <div><div class="preview-kicker">Working table</div><div class="preview-heading-text">Inventory overview</div></div>
+                    <span class="preview-export-btn">Export XLSX</span>
+                  </div>
+                  <div class="preview-stat-row">
+                    <div class="preview-stat"><small>Visible</small><strong>248</strong></div>
+                    <div class="preview-stat"><small>Groups</small><strong>18</strong></div>
+                    <div class="preview-stat"><small>Hidden</small><strong>12</strong></div>
+                  </div>
+                  <div class="preview-table">
+                    <div class="preview-row preview-row-head"><span></span><span>RECORD</span><span>WAREHOUSE</span><span>UNITS</span></div>
+                    <div class="preview-row"><span class="preview-check"></span><span>Acme paper rolls</span><span>North hub</span><span>1,240</span></div>
+                    <div class="preview-row"><span class="preview-check"></span><span>Shipping labels</span><span>West hub</span><span>680</span></div>
+                    <div class="preview-row"><span class="preview-check"></span><span>Thermal printer</span><span>North hub</span><span>24</span></div>
+                    <div class="preview-row preview-row-faded"><span class="preview-check"></span><span>Legacy cartons</span><span>South hub</span><span>0</span></div>
+                  </div>
+                  <div class="preview-bottom"><span>Showing 1-4 of 248 rows</span><span>Original data untouched</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="float-card float-top"><span class="float-icon float-icon-blue">&#10003;</span><div><strong>Clean export ready</strong><small>Hidden rows excluded</small></div></div>
+            <div class="float-card float-bottom"><span class="float-icon float-icon-green">&#9673;</span><div><strong>Private by default</strong><small>Stays in your browser</small></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Proof Bar ─────────────────────────────── -->
+      <div class="proof-bar">
+        <div class="container proof-inner">
+          <span class="proof-lead">Built for the sheets your team already uses</span>
+          <span class="proof-item"><strong>XLSX</strong> Excel workbooks</span>
+          <span class="proof-item"><strong>CSV</strong> Delimited data</span>
+          <span class="proof-item"><strong>TSV</strong> Simple exports</span>
+          <span class="proof-item"><strong>8</strong> SDK modules</span>
+          <span class="proof-item"><strong>100%</strong> In-browser</span>
+        </div>
+      </div>
+
+      <!-- ── Features ──────────────────────────────── -->
+      <section class="section container" id="features">
+        <div class="features-header">
+          <div class="features-header-left">
+            <span class="section-eyebrow">Workspace + SDK</span>
+            <h2>Everything your team needs. <em>Everything your tools need.</em></h2>
+          </div>
+          <p class="features-header-right">A working spreadsheet tool that doubles as a full development platform. Your team gets a clean workspace. Your tools get 40+ API methods to build on.</p>
+        </div>
+        <div class="features-grid">
+          <article class="feature-card feature-card-wide">
+            <div class="feature-head">
+              <div class="feature-icon feature-icon-blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+              </div>
+              <span class="feature-num">01</span>
+            </div>
+            <h3>Modular SDK</h3>
+            <p>8 independent modules — core, events, data, modal, sidebar, topbar, shortcuts, and init. Each is an IIFE that attaches to the <code>window.sf</code> namespace. Use only what you need.</p>
+            <div class="feature-mini feature-mini-rows">
+              <div class="mini-bar"><span class="mini-bar-fill" style="width:100%;opacity:.35"></span><span class="mini-bar-text">sf.core &middot; refs, state, wrappers</span></div>
+              <div class="mini-bar"><span class="mini-bar-fill" style="width:100%;opacity:.55"></span><span class="mini-bar-text">sf.data &middot; read, write, edit rows</span></div>
+              <div class="mini-bar"><span class="mini-bar-fill" style="width:60%;opacity:.35"></span><span class="mini-bar-text">sf.events &middot; on, off, emit, once</span></div>
+            </div>
+          </article>
+          <article class="feature-card">
+            <div class="feature-head">
+              <div class="feature-icon feature-icon-violet">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="10" y1="3" x2="10" y2="21"/></svg>
+              </div>
+              <span class="feature-num">02</span>
+            </div>
+            <h3>Full UI access</h3>
+            <p>Add buttons to the topbar, inject panels into the sidebar, and open custom modals. Tools integrate into the workspace without touching the core.</p>
+            <div class="feature-mini feature-mini-groups">
+              <div class="mini-group"><span class="mini-group-bar"></span><div><strong>sf.topbar</strong><small>Buttons, dropdowns, status</small></div></div>
+              <div class="mini-group"><span class="mini-group-bar mini-group-bar-2"></span><div><strong>sf.sidebar</strong><small>Nav sections, panels</small></div></div>
+              <div class="mini-group"><span class="mini-group-bar mini-group-bar-3"></span><div><strong>sf.modal</strong><small>Dialogs, confirms, prompts</small></div></div>
+            </div>
+          </article>
+          <article class="feature-card">
+            <div class="feature-head">
+              <div class="feature-icon feature-icon-green">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <span class="feature-num">03</span>
+            </div>
+            <h3>Event-driven</h3>
+            <p>React to data changes, sheet switches, and tool lifecycle events. Register custom keyboard shortcuts. Subscribe once or persistently.</p>
+            <div class="feature-mini feature-mini-export">
+              <div class="mini-export-file"><span>&#9889;</span></div>
+              <div><strong>sf.on("data:changed", fn)</strong><small>Real-time reactive hooks</small></div>
+              <span class="mini-export-check">&#10003;</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ── Platform / SDK Overview ────────────────── -->
+      <section class="section section-white" id="platform">
+        <div class="container">
+          <div class="section-center">
+            <span class="section-eyebrow">The <code>window.sf</code> API</span>
+            <h2>40+ methods. <em>Zero dependencies.</em></h2>
+            <p class="section-sub">Every SDK module is a plain IIFE — no build step, no framework. Tools call <code>registerTool()</code> and get full access to the workspace through a single namespace.</p>
+          </div>
+          <div class="platform-grid">
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-blue">{ }</span>
+                <h3>sf.core</h3>
+              </div>
+              <p>Refs, state, and utility wrappers. The foundation every tool builds on.</p>
+              <code class="platform-code">sf.refs, sf.state, sf.showToast()</code>
+            </div>
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-violet">&#9889;</span>
+                <h3>sf.events</h3>
+              </div>
+              <p>Subscribe to data changes, sheet switches, and custom tool events.</p>
+              <code class="platform-code">sf.on(), sf.off(), sf.emit(), sf.once()</code>
+            </div>
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-green">&#9638;</span>
+                <h3>sf.data</h3>
+              </div>
+              <p>Read and write rows, set cell values, hide/show, edit, delete, insert.</p>
+              <code class="platform-code">sf.setCellValue(), sf.getVisibleRows()</code>
+            </div>
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-blue">&#9670;</span>
+                <h3>sf.modal</h3>
+              </div>
+              <p>Open custom dialogs, confirmation prompts, and input forms.</p>
+              <code class="platform-code">sf.openModal(), sf.confirm(), sf.prompt()</code>
+            </div>
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-violet">&#9776;</span>
+                <h3>sf.sidebar</h3>
+              </div>
+              <p>Add nav sections and panels to the workspace sidebar.</p>
+              <code class="platform-code">sf.addSidebarSection(), sf.removeSidebarSection()</code>
+            </div>
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-green">&#9881;</span>
+                <h3>sf.topbar</h3>
+              </div>
+              <p>Inject buttons, dropdowns, and status badges into the top toolbar.</p>
+              <code class="platform-code">sf.addTopbarButton(), sf.addTopbarDropdown()</code>
+            </div>
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-blue">&#8984;</span>
+                <h3>sf.shortcuts</h3>
+              </div>
+              <p>Register custom keyboard shortcuts with optional modifier keys.</p>
+              <code class="platform-code">sf.registerShortcut(), sf.unregisterShortcut()</code>
+            </div>
+            <div class="platform-module">
+              <div class="platform-module-head">
+                <span class="platform-module-icon platform-module-icon-violet">&#9879;</span>
+                <h3>sf.init</h3>
+              </div>
+              <p>Wires the SDK into the base app. Monkey-patches core methods for tool lifecycle.</p>
+              <code class="platform-code">Automatically loaded on workspace boot</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tool System ────────────────────────────── -->
+      <section class="section section-dark" id="tools">
+        <div class="container tools-grid">
+          <div class="tools-copy">
+            <span class="section-eyebrow section-eyebrow-light">Build and share</span>
+            <h2>Ship a tool in a <em>single .sf file.</em></h2>
+            <p class="tools-sub">Every tool is a self-contained <code>.sf</code> file. It calls <code>registerTool()</code>, gets access to the full <code>window.sf</code> SDK, and injects its own UI into the workspace. No core changes required.</p>
+            <div class="tools-badges">
+              <span class="tool-badge"><span class="tool-badge-dot tool-badge-dot-blue"></span> .sf tool files</span>
+              <span class="tool-badge"><span class="tool-badge-dot tool-badge-dot-green"></span> One-click install</span>
+              <span class="tool-badge"><span class="tool-badge-dot tool-badge-dot-violet"></span> Full SDK access</span>
+            </div>
+            <div class="tools-links">
+              <a class="button button-white button-large" href="./docs/tool-development.html">Read the SDK docs &#8594;</a>
+              <a class="button button-ghost-light button-large" href="./Main/index.html">Try it live &#8599;</a>
+              <a class="button button-ghost-light button-large" href="./assets/sdk-showcase.sf" id="downloadDemoTool" download="sdk-showcase.sf">Download demo tool &#8595;</a>
+            </div>
+          </div>
+          <div class="tools-visual">
+            <div class="tools-code-window">
+              <div class="tools-code-chrome">
+                <div class="tools-code-dots"><span></span><span></span><span></span></div>
+                <span class="tools-code-filename">my-tool.sf</span>
+              </div>
+              <pre class="tools-code-body"><code><span class="tc-fn">registerTool</span>({
+  <span class="tc-key">id</span>: <span class="tc-str">"row-highlighter"</span>,
+  <span class="tc-key">name</span>: <span class="tc-str">"Row Highlighter"</span>,
+  <span class="tc-key">icon</span>: <span class="tc-str">"&#127912;"</span>,
+
+  <span class="tc-fn">activate</span>() {
+    <span class="tc-comment">// Add a button to the topbar</span>
+    sf.<span class="tc-fn">addTopbarButton</span>({
+      <span class="tc-key">id</span>: <span class="tc-str">"hl-toggle"</span>,
+      <span class="tc-key">label</span>: <span class="tc-str">"&#127912; Highlight"</span>,
+      <span class="tc-key">onClick</span>: () => <span class="tc-fn">toggleHighlights</span>()
+    });
+
+    <span class="tc-comment">// React to data changes</span>
+    sf.<span class="tc-fn">on</span>(<span class="tc-str">"data:changed"</span>, () => {
+      <span class="tc-fn">refreshHighlights</span>();
+    });
+
+    <span class="tc-comment">// Register a keyboard shortcut</span>
+    sf.<span class="tc-fn">registerShortcut</span>({
+      <span class="tc-key">key</span>: <span class="tc-str">"h"</span>, <span class="tc-key">ctrl</span>: <span class="tc-kw">true</span>,
+      <span class="tc-key">label</span>: <span class="tc-str">"Toggle highlights"</span>,
+      <span class="tc-key">handler</span>: () => <span class="tc-fn">toggleHighlights</span>()
+    });
+  },
+
+  <span class="tc-fn">deactivate</span>() {
+    sf.<span class="tc-fn">off</span>(<span class="tc-str">"data:changed"</span>);
+  }
+});</code></pre>
+            </div>
+            <div class="tools-preview-float">
+              <div class="tools-preview-row">
+                <span class="tools-preview-btn">&#9881; Tools <span class="tools-preview-count">3</span></span>
+                <span class="tools-preview-btn tools-preview-btn-active">&#127912; Highlight</span>
+              </div>
+              <div class="tools-preview-panel">
+                <div class="tools-preview-panel-head"><strong>Row Highlighter</strong><span class="tools-preview-active-badge">Active</span></div>
+                <div class="tools-preview-row-item"><span class="tools-preview-color" style="background:#fef3c7"></span><span>sf.data.hideRows()</span></div>
+                <div class="tools-preview-row-item"><span class="tools-preview-color" style="background:#dbeafe"></span><span>sf.on("data:changed")</span></div>
+                <div class="tools-preview-row-item"><span class="tools-preview-color" style="background:#dcfce7"></span><span>sf.registerShortcut()</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── How It Works ──────────────────────────── -->
+      <section class="section section-white" id="how-it-works">
+        <div class="container">
+          <div class="section-center">
+            <span class="section-eyebrow">From workspace to platform</span>
+            <h2>Use it. <em>Extend it.</em></h2>
+            <p class="section-sub">Sheetflow works as a standalone tool and as a development platform. Start with the workspace, then build on it.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <span class="step-num">1</span>
+              <div class="step-body">
+                <h3>Open the workspace</h3>
+                <p>Import an XLSX, CSV, or TSV file. Nothing is uploaded — everything runs in your browser.</p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-num">2</span>
+              <div class="step-body">
+                <h3>Write a tool</h3>
+                <p>Create a <code>.sf</code> file. Call <code>registerTool()</code>, use the <code>sf.*</code> SDK, and build custom UI.</p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-num">3</span>
+              <div class="step-body">
+                <h3>Install and share</h3>
+                <p>Drop the tool file into the workspace. It activates instantly — buttons, panels, and all.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Privacy ───────────────────────────────── -->
+      <section class="section container" id="privacy">
+        <div class="privacy-card">
+          <div class="privacy-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="privacy-copy">
+            <span class="section-eyebrow">Private by design</span>
+            <h2>Your spreadsheet stays <em>where you opened it.</em></h2>
+            <p>Sheetflow processes files locally in your browser. It does not upload, rewrite, or quietly reorder your source data.</p>
+          </div>
+          <a class="text-link" href="./Main/index.html">Open a private workspace <span>&#8594;</span></a>
+        </div>
+      </section>
+
+      <!-- ── CTA ────────────────────────────────────── -->
+      <section class="cta-section">
+        <div class="container cta-inner">
+          <div class="cta-copy">
+            <span class="section-eyebrow section-eyebrow-light">Start building</span>
+            <h2>Your workspace. <em>Your rules.</em></h2>
+            <p>Open the workspace, read the SDK docs, and start building tools that fit your workflow.</p>
+          </div>
+          <div class="cta-actions">
+            <a class="button button-white button-large" href="./Main/index.html">Open workspace &#8594;</a>
+            <a class="button button-ghost-light button-large" href="./docs/tool-development.html">SDK documentation &#8594;</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-left">
+          <a class="brand" href="./index.html" aria-label="Sheetflow home">
+            <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+            <span class="brand-name">sheetflow</span>
+          </a>
+          <p>An extensible spreadsheet workspace with a full SDK.</p>
+        </div>
+        <div class="footer-credit">
+          <img src="./networKING.svg" alt="networKING logo">
+          <div><small>A product by</small><strong>networKING</strong></div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const installButtons = Array.from(document.querySelectorAll(".install-button"));
+      const installStatus = document.getElementById("installStatus");
+      const menuButton = document.getElementById("menuButton");
+      const mobileNav = document.getElementById("mobileNav");
+      let deferredPrompt = null;
+
+      function setInstallMessage(message) {
+        if (installStatus) installStatus.textContent = message;
+      }
+
+      function isStandalone() {
+        return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      }
+
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredPrompt = event;
+        installButtons.forEach((button) => { button.textContent = "Install app"; });
+      });
+
+      installButtons.forEach((button) => button.addEventListener("click", async () => {
+        if (isStandalone()) {
+          setInstallMessage("Sheetflow is already installed on this device.");
+          return;
+        }
+        if (!deferredPrompt) {
+          setInstallMessage("Use your browser's install option to add Sheetflow to your desktop.");
+          window.setTimeout(() => { window.location.href = "./Main/index.html"; }, 500);
+          return;
+        }
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        setInstallMessage(choice.outcome === "accepted" ? "Sheetflow is ready to use from your desktop." : "You can install Sheetflow whenever you are ready.");
+        deferredPrompt = null;
+      }));
+
+      window.addEventListener("appinstalled", () => {
+        deferredPrompt = null;
+        setInstallMessage("Sheetflow is ready to use from your desktop.");
+      });
+
+      if (menuButton && mobileNav) {
+        menuButton.addEventListener("click", () => {
+          const isOpen = menuButton.getAttribute("aria-expanded") === "true";
+          menuButton.setAttribute("aria-expanded", String(!isOpen));
+          mobileNav.hidden = isOpen;
+        });
+        mobileNav.addEventListener("click", (event) => {
+          if (event.target.closest("a")) {
+            menuButton.setAttribute("aria-expanded", "false");
+            mobileNav.hidden = true;
+          }
+        });
+      }
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./Main/service-worker.js", { scope: "./Main/" })
+            .catch((error) => console.warn("Sheetflow offline support is unavailable.", error));
+        });
+      }
+
+      var downloadBtn = document.getElementById("downloadDemoTool");
+      if (downloadBtn) {
+        downloadBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          fetch("./assets/sdk-showcase.sf")
+            .then(function (r) { return r.blob(); })
+            .then(function (blob) {
+              var url = URL.createObjectURL(blob);
+              var a = document.createElement("a");
+              a.href = url;
+              a.download = "sdk-showcase.sf";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            })
+            .catch(function () {
+              window.location.href = "./assets/sdk-showcase.sf";
+            });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

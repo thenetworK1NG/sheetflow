@@ -1,0 +1,13 @@
+{
+  "format": "sheetflow-tool",
+  "version": 1,
+  "tool": {
+    "id": "export-csv",
+    "name": "Export CSV",
+    "icon": "↓",
+    "description": "Export visible rows as CSV. Hidden rows are excluded.",
+    "author": "Sheetflow",
+    "version": "1.0.0",
+    "code": "(function() {\n  var _ec = { refs: {} };\n\n  function exportCsv() {\n    var sheet = currentSheet();\n    if (!sheet) { showToast(\"No sheet loaded.\", \"error\"); return; }\n    var visible = sheet.rows.filter(function(r) { return !r.hidden; });\n    if (!visible.length) { showToast(\"No visible rows to export.\", \"error\"); return; }\n    var escapeCSV = function(val) {\n      var text = valueToString(val);\n      if (text.includes(',') || text.includes('\"') || text.includes('\\n')) {\n        return '\"' + text.replace(/\"/g, '\"\"') + '\"';\n      }\n      return text;\n    };\n    var lines = [sheet.headers.map(escapeCSV).join(',')];\n    visible.forEach(function(row) { lines.push(row.values.map(escapeCSV).join(',')); });\n    var csv = lines.join('\\n');\n    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });\n    var url = URL.createObjectURL(blob);\n    var a = document.createElement('a');\n    a.href = url;\n    a.download = (state.fileName || 'export').replace(/\\.[^.]+$/, '') + '.csv';\n    document.body.appendChild(a);\n    a.click();\n    document.body.removeChild(a);\n    URL.revokeObjectURL(url);\n    showToast('Exported ' + visible.length + ' rows as CSV.', 'success');\n  }\n\n  function injectUI() {\n    var slot = document.getElementById(\"toolButtonsSlot\");\n    if (!slot) return;\n    var btn = document.createElement(\"button\");\n    btn.className = \"button button-primary button-small\";\n    btn.type = \"button\";\n    btn.textContent = \"Export CSV\";\n    btn.id = \"_ec_exportBtn\";\n    slot.appendChild(btn);\n    _ec.refs.exportBtn = btn;\n    _ec.refs.exportBtn.addEventListener(\"click\", exportCsv);\n  }\n\n  function removeUI() {\n    var btn = document.getElementById(\"_ec_exportBtn\");\n    if (btn) btn.remove();\n    _ec.refs = {};\n  }\n\n    registerTool({\n    id: \"export-csv\",\n    name: \"Export CSV\",\n    icon: \"↓\",\n    description: \"Export visible rows as CSV. Hidden rows are excluded.\",\n    activate() { injectUI(); },\n    deactivate() { removeUI(); }\n  });\n})();"
+  }
+}

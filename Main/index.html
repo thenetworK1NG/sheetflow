@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="description" content="Review, organize, and export business spreadsheets from your browser.">
+  <meta name="application-name" content="Sheetflow">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sheetflow">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Sheetflow - Spreadsheet Organizer</title>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar-edge" id="sidebarEdge"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <div class="brand"><span class="brand-mark">+</span><span class="brand-text">SHEETFLOW</span></div>
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Collapse sidebar" aria-label="Toggle sidebar">&lsaquo;</button>
+      </div>
+      <div class="sidebar-body">
+        <div class="side-kicker">Import</div>
+        <label class="drop-zone" id="dropZone" for="fileInput">
+          <div class="drop-topline"><span class="drop-icon">+</span><span class="file-types">XLSX / CSV</span></div>
+          <strong>Import a spreadsheet</strong>
+          <p>Choose an Excel or CSV file to review and organize.</p>
+        </label>
+        <input class="sr-only" id="fileInput" type="file" accept=".xlsx,.xls,.csv,.tsv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        <div id="toolSidebarSlot" class="tool-sidebar-slot"></div>
+      </div>
+    </aside>
+
+     <main class="main">
+         <header class="topbar">
+          <div class="top-status"><span class="status-dot" id="workspaceDot"></span><span id="topStatus">Waiting for a spreadsheet</span></div>
+          <div class="top-actions"><div id="toolActionSlot" class="tool-action-slot"></div><div id="toolDropdownSlot" class="tool-dropdown-slot"></div><div id="toolButtonsSlot" class="tool-buttons-slot"></div><button class="button button-ghost" id="toolsButton" type="button" aria-expanded="false">Tools <span class="button-count" id="toolsCount">0</span></button><button class="button button-ghost" id="clearButton" type="button" disabled>Clear workspace</button><button class="button button-primary" id="exportXlsxButton" type="button" disabled>Export XLSX</button></div>
+        </header>
+
+
+       <div id="toolPanelsSlot" class="tool-panels-slot"></div>
+
+       <section class="workspace" id="workspaceSection" aria-label="Spreadsheet workspace">
+        <div class="workspace-head">
+          <div><div class="section-kicker">Working table</div><h2 id="tableTitle">Spreadsheet rows</h2><p class="section-copy" id="tableSubtitle">Import your spreadsheet to begin.</p></div>
+        </div>
+        <div class="table-stage">
+          <div class="table-scroll" id="tableScroll" hidden><table id="stockTable"><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+          <div class="empty-state" id="emptyState">
+            <div class="empty-inner">
+              <div class="empty-icon-wrap">
+                <div class="empty-icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+              </div>
+              <h3 id="emptyTitle">Bring in your spreadsheet</h3>
+              <p id="emptyCopy">Drop an XLSX or CSV file anywhere, or use the import panel on the left. Your data stays private and never leaves your browser.</p>
+              <div class="empty-hints">
+                <span class="empty-hint">XLSX</span>
+                <span class="empty-hint">CSV</span>
+                <span class="empty-hint">TSV</span>
+              </div>
+            </div>
+          </div>
+        </div>
+         <div class="page-controls" id="pageControls" hidden>
+           <button class="button button-ghost button-small" id="previousPageButton" type="button" disabled>Previous</button>
+           <span id="pageStatus">Page 1 of 1</span>
+           <button class="button button-ghost button-small" id="nextPageButton" type="button" disabled>Next</button>
+         </div>
+         <div class="workspace-foot"><span id="resultCount">No rows loaded</span><div class="workspace-maker"><img src="../networKING.svg" alt="networKING logo"><span>networKING</span></div></div>
+      </section>
+    </main>
+  </div>
+  <div class="tools-overlay" id="toolsOverlay" hidden>
+    <div class="tools-modal" id="toolsPanel" aria-labelledby="toolsTitle">
+      <div class="tools-modal-head">
+        <div><div class="section-kicker">Extend functionality</div><h2 id="toolsTitle">Tools</h2><p class="section-copy">Install .sf tool files or open built-in tools.</p></div>
+        <div class="tools-modal-actions"><a class="button button-ghost button-small" href="../toolhub/index.html" target="_blank" rel="noopener">&#128230; Tool Hub</a><button class="button button-primary button-small" id="installToolButton" type="button">Install tool</button><input class="sr-only" id="installToolInput" type="file" accept=".sf,.json"><button class="button button-ghost button-small" id="closeToolsButton" type="button">Close</button></div>
+      </div>
+      <div class="tools-list" id="toolsList"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="sfModalContainer"></div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="./js/core/core.js"></script>
+  <script src="./js/core/utils.js"></script>
+  <script src="./js/core/storage.js"></script>
+  <script src="./js/sheet/csv-parser.js"></script>
+  <script src="./js/sheet/sheet.js"></script>
+  <script src="./js/sheet/grouping.js"></script>
+  <script src="./js/features/table.js"></script>
+  <script src="./js/features/ui.js"></script>
+  <script src="./js/features/undo.js"></script>
+  <script src="./js/features/export.js"></script>
+  <script src="./js/tools/tools.js"></script>
+  <script src="./js/sdk/core.js"></script>
+  <script src="./js/sdk/events.js"></script>
+  <script src="./js/sdk/data.js"></script>
+  <script src="./js/sdk/modal.js"></script>
+  <script src="./js/sdk/sidebar.js"></script>
+  <script src="./js/sdk/topbar.js"></script>
+  <script src="./js/sdk/shortcuts.js"></script>
+  <script src="./js/sdk/init.js"></script>
+  <script src="./js/actions.js"></script>
+  <script src="./js/events.js"></script>
+  <script src="./js/init.js"></script>
+</body>
+</html>
