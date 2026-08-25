@@ -91,7 +91,7 @@ h1 span, h2 span, h1 em, h2 em { font-style: normal; color: var(--blue); }
     radial-gradient(ellipse 80% 60% at 70% 40%, rgba(37, 99, 235, .18), transparent),
     radial-gradient(ellipse 50% 50% at 20% 80%, rgba(124, 58, 237, .1), transparent);
 }
-.hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, .9fr) minmax(500px, 1.1fr); align-items: center; gap: 60px; padding-top: 90px; padding-bottom: 90px; }
+.hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, .9fr) minmax(min(500px, 100%), 1.1fr); align-items: center; gap: 60px; padding-top: 90px; padding-bottom: 90px; }
 .hero-copy { padding-bottom: 8px; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
@@ -259,7 +259,7 @@ h2 { font-size: clamp(32px, 4vw, 48px); font-weight: 720; letter-spacing: -.065e
 .tc-kw { color: #f9a8d4; }
 .tc-comment { color: rgba(255,255,255,.25); font-style: italic; }
 
-.tools-preview-float { position: relative; z-index: 1; margin-top: -30px; margin-left: 40px; max-width: 300px; }
+.tools-preview-float { position: relative; z-index: 1; margin-top: -30px; margin-left: 40px; max-width: min(300px, 100%); }
 .tools-preview-row { display: flex; gap: 6px; margin-bottom: 8px; }
 .tools-preview-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 6px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.5); font-size: 10px; font-weight: 600; }
 .tools-preview-btn-active { color: var(--blue); background: rgba(37,99,235,.15); border-color: rgba(37,99,235,.3); }
@@ -340,7 +340,7 @@ h2 { font-size: clamp(32px, 4vw, 48px); font-weight: 720; letter-spacing: -.065e
 
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 1050px) {
-  .hero-grid { grid-template-columns: minmax(0, .85fr) minmax(440px, 1.15fr); gap: 36px; }
+  .hero-grid { grid-template-columns: minmax(0, .85fr) minmax(min(440px, 100%), 1.15fr); gap: 36px; }
   .hero-visual { padding-left: 0; }
 }
 @media (max-width: 900px) {
@@ -431,4 +431,13 @@ h2 { font-size: clamp(32px, 4vw, 48px); font-weight: 720; letter-spacing: -.065e
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* ── Touch Improvements ──────────────────────── */
+@media (pointer: coarse) {
+  .button { min-height: 44px; }
+  .button-large { min-height: 52px; }
+  .button-nav { min-height: 40px; }
+  .nav-links a { padding: 8px 12px; }
+  .mobile-nav a { padding: 12px 4px; }
 }

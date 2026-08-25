@@ -167,9 +167,17 @@
     @media (max-width: 620px) {
       .container { width: min(960px, calc(100% - 32px)); }
       .nav-links { display: none; }
+      .menu-button { display: block; }
+      .mobile-nav { display: grid; gap: 2px; padding-bottom: 14px; }
+      .mobile-nav a { padding: 8px 2px; color: var(--muted); font-size: 13px; font-weight: 600; }
+      .mobile-nav a:last-child { color: var(--blue); }
       .hero { padding: 40px 0 32px; }
       .tools-grid { grid-template-columns: 1fr; }
     }
+    .menu-button { display: none; width: 38px; height: 38px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); flex-shrink: 0; }
+    .menu-button span { display: block; width: 16px; height: 1.5px; margin: 4px auto; background: var(--ink); border-radius: 1px; }
+    .mobile-nav { display: none; }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
@@ -185,7 +193,14 @@
         <a href="../Main/index.html"><span class="btn-icon">&#9881;</span> Open workspace</a>
         <a href="../docs/tool-development.html"><span class="btn-icon">&#9998;</span> Build a tool</a>
       </div>
+      <button class="menu-button" id="menuButton" type="button" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span>
+      </button>
     </nav>
+    <div class="mobile-nav container" id="mobileNav" hidden>
+      <a href="../Main/index.html">Open workspace</a>
+      <a href="../docs/tool-development.html">Build a tool</a>
+    </div>
   </header>
 
   <section class="hero">
@@ -220,6 +235,22 @@
       var countEl = document.getElementById("toolCount");
       var allTools = [];
       var activeFilter = null;
+
+      var menuButton = document.getElementById("menuButton");
+      var mobileNav = document.getElementById("mobileNav");
+      if (menuButton && mobileNav) {
+        menuButton.addEventListener("click", function() {
+          var isOpen = menuButton.getAttribute("aria-expanded") === "true";
+          menuButton.setAttribute("aria-expanded", String(!isOpen));
+          mobileNav.hidden = isOpen;
+        });
+        mobileNav.addEventListener("click", function(event) {
+          if (event.target.closest("a")) {
+            menuButton.setAttribute("aria-expanded", "false");
+            mobileNav.hidden = true;
+          }
+        });
+      }
 
       function escapeHTML(str) {
         var div = document.createElement("div");

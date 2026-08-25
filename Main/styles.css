@@ -300,6 +300,15 @@ button { font: inherit; cursor: pointer; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 
+/* ── Touch Improvements ──────────────────────── */
+@media (pointer: coarse) {
+  .button { min-height: 44px; }
+  .button-small { min-height: 38px; }
+  .row-action { width: 32px; height: 32px; }
+  .expand-button { width: 28px; height: 28px; }
+  .sidebar-toggle { width: 36px; height: 36px; }
+}
+
 /* ── Mobile Responsive ────────────────────────── */
 @media (max-width: 900px) {
   .app-shell { grid-template-columns: 1fr; }
@@ -323,6 +332,12 @@ button { font: inherit; cursor: pointer; }
   .stat-value { font-size: 22px; }
   .top-actions .button:not(.button-primary) span:not(.button-count) { display: none; }
   .tool-action-slot, .tool-dropdown-slot { display: none; }
+  .topbar { padding: 10px 12px; }
+  .workspace { padding: 0 12px 12px; }
+  .workspace-head { padding: 16px 0 12px; }
+  .workspace-foot { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .empty-state { padding: 40px 12px; }
+  .page-controls { padding: 10px 0; font-size: 12px; }
 }
 
 /* ── SDK: Modal ───────────────────────────────── */
