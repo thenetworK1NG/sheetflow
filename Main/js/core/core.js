@@ -13,8 +13,7 @@ const refs = {
   toolsButton: $("toolsButton"), toolsCount: $("toolsCount"), toolsOverlay: $("toolsOverlay"), toolsPanel: $("toolsPanel"), toolsList: $("toolsList"), closeToolsButton: $("closeToolsButton"),
   installToolButton: $("installToolButton"), installToolInput: $("installToolInput"),
   pageControls: $("pageControls"), pageStatus: $("pageStatus"), previousPageButton: $("previousPageButton"), nextPageButton: $("nextPageButton"),
-  sidebar: $("sidebar"), sidebarToggle: $("sidebarToggle"), sidebarEdge: $("sidebarEdge"),
-  mobileImportButton: $("mobileImportButton")
+  sidebar: $("sidebar"), sidebarToggle: $("sidebarToggle"), sidebarEdge: $("sidebarEdge")
 };
 
 const state = {

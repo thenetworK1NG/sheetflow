@@ -34,7 +34,6 @@ refs.dropZone.addEventListener("drop", (event) => {
   importFile(event.dataTransfer.files[0]);
 });
 refs.emptyState.addEventListener("click", () => refs.fileInput.click());
-refs.mobileImportButton.addEventListener("click", () => refs.fileInput.click());
 refs.tableBody.addEventListener("click", handleTableClick);
 refs.clearButton.addEventListener("click", clearWorkspace);
 refs.exportXlsxButton.addEventListener("click", exportXlsx);
