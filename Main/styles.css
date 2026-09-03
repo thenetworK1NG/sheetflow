@@ -336,14 +336,25 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 600px) {
   .stat-card { min-height: 90px; padding: 14px; }
   .stat-value { font-size: 22px; }
+  .top-actions {
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; max-width: 100%;
+    scrollbar-width: none;
+  }
+  .top-actions::-webkit-scrollbar { display: none; }
   .top-actions .button:not(.button-primary) span:not(.button-count) { display: none; }
   .tool-action-slot, .tool-dropdown-slot { display: none; }
-  .topbar { padding: 10px 12px; }
+  .topbar { padding: 10px 12px; flex-wrap: nowrap; }
+  .topbar .top-status { flex-shrink: 0; }
   .workspace { padding: 0 12px 12px; }
   .workspace-head { padding: 16px 0 12px; }
   .workspace-foot { flex-direction: column; gap: 8px; align-items: flex-start; }
   .empty-state { padding: 40px 12px; }
   .page-controls { padding: 10px 0; font-size: 12px; }
+  .tools-modal-head { flex-direction: column; gap: 12px; padding: 18px 16px 0; }
+  .tools-modal-actions { flex-wrap: wrap; width: 100%; }
+  .tools-list { padding: 14px 16px 18px; }
+  .tool-card { flex-wrap: wrap; }
 }
 
 /* ── SDK: Modal ───────────────────────────────── */
